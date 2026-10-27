@@ -9,8 +9,6 @@ A tiny fantasy console for Lua in the style of the classic Brick Game.
 - **20×20 grid of 8×8 bricks** (left side) + dedicated text panel (right side)
 - Single-channel sound (square wave)
 
-**The API is stable** — function names, signatures, and behavior won't change. Only cosmetic additions (new functions, examples, docs) may appear.
-
 ## Build
 
 ```bash
