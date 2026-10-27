@@ -1,0 +1,41 @@
+# Object files (только в build, вендор не трогаем)
+build*/**/*.o
+build*/**/*.obj
+build*/**/*.a
+build*/**/*.lib
+
+# Binaries (только в build)
+build*/**/*.exe
+build*/**/*.dll
+build*/**/*.so
+build*/**/*.dylib
+
+# Всё остальное — как было
+build/
+build-*/
+
+# raylib shared libs — не нужны (используем .a)
+raylib/**/lib/*.so*
+
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+
+save/
+*.srm
+*.state
+
+*.log
+dotlua_log.txt
+
+.vscode/
+.idea/
+*.swp
+*~
+.clangd/
+.cache/
+
+.DS_Store
+Thumbs.db
+desktop.ini

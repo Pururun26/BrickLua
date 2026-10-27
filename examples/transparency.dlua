@@ -1,0 +1,20 @@
+t = 0
+
+function update()
+    t = t + 1
+    cls(0)
+
+    -- рамка
+    for i = 0, 95 do
+        pset(i, 0, 1); pset(i, 95, 1)
+        pset(0, i, 1); pset(95, i, 1)
+    end
+
+    -- движущийся квадрат 8x8 через Lua
+    local x = 4 + (t % 80)
+    for dy = 0, 7 do
+        for dx = 0, 7 do
+            pset(x + dx, 44 + dy, 1)
+        end
+    end
+end

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="data:,">
+    <title>BrickLua</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            font-family: monospace;
+        }
+        
+        /* Центрируем холст на экране */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Стили для холста, который генерирует Emscripten */
+        canvas.emscripten, #canvas {
+            display: block;
+            border: 0px none;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            cursor: none;
+            outline: none;
+            
+            /* Устанавливаем максимальный размер 720x480 (x3 масштаб) */
+            /* Если окно меньше — холст будет уменьшаться, сохраняя пропорции */
+            width: min(720px, 95vw, 95vh * 1.5) !important;
+            height: min(480px, 95vh, 95vw / 1.5) !important;
+            
+            /* Тень, чтобы выделить консоль */
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            border-radius: 4px;
+        }
+
+        #status {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #9ead86;
+            font-size: 18px;
+            text-align: center;
+            pointer-events: none;
+            background: #111;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            z-index: 10;
+        }
+        #status.hidden { display: none; }
+        #status.error {
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+            max-width: 80%;
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body>
+    <!-- Emscripten будет использовать этот canvas -->
+    <canvas id="canvas" class="emscripten" oncontextmenu="event.preventDefault()"></canvas>
+    
+    <div id="status">Загрузка BrickLua...</div>
+
+    <script>
+        var Module = {
+            noInitialRun: true, // Мы сами вызовем main
+            canvas: document.getElementById('canvas'),
+            onRuntimeInitialized: async function() {
+                const ok = await loadCart();
+                if (!ok) return;
+                document.getElementById('status').classList.add('hidden');
+                // Передаем путь к картриджу в main(argc, argv)
+                Module.callMain(['/cart.brick']);
+            }
+        };
+
+        function setStatus(text, isError) {
+            const el = document.getElementById('status');
+            el.textContent = text;
+            if (isError) {
+                el.classList.add('error');
+                el.classList.remove('hidden');
+            }
+        }
+
+        async function loadCart() {
+            try {
+                setStatus('Загрузка cart.brick...');
+                const resp = await fetch('cart.brick');
+                if (!resp.ok) {
+                    setStatus('cart.brick не найден (' + resp.status + '). Положите его рядом с index.html.', true);
+                    return false;
+                }
+                const buf = new Uint8Array(await resp.arrayBuffer());
+                
+                // Записываем файл в виртуальную файловую систему Emscripten
+                FS.writeFile('/cart.brick', buf);
+                console.log('[BrickLua] Картридж загружен:', buf.length, 'байт');
+                return true;
+            } catch (e) {
+                console.error('[BrickLua] Ошибка загрузки:', e);
+                setStatus('Ошибка загрузки: ' + e.message, true);
+                return false;
+            }
+        }
+
+        // Разблокировка звука после первого клика (политика браузеров)
+        document.addEventListener('click', function once() {
+            document.removeEventListener('click', once);
+            if (typeof Module !== 'undefined') {
+                // Raylib использует WebAudio через SDL2
+                if (Module.SDL2 && Module.SDL2.audioContext) {
+                    Module.SDL2.audioContext.resume();
+                } else if (Module.webaudio && Module.webaudio.audioContext) {
+                    Module.webaudio.audioContext.resume();
+                }
+            }
+        });
+    </script>
+    
+    <!-- Сюда Emscripten вставит сгенерированный JS-код движка -->
+    {{{ SCRIPT }}}
+</body>
+</html>

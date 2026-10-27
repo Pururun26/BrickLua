@@ -1,0 +1,16 @@
+# native
+cmake -S . -B build-native
+cmake --build build-native
+./build-native/bricklua.exe examples/snake.dlua
+
+#linux
+cd /mnt/c/home/pururun/Dev/BrickLua/
+cmake -S . -B build-linux-desktop -DCMAKE_BUILD_TYPE=Release
+cmake --build build-linux-desktop
+
+
+# web
+source /c/emsdk/emsdk_env.sh
+emcmake cmake -S . -B build-web
+cmake --build build-web
+cd build-web && python -m http.server 8000
