@@ -1,0 +1,4 @@
+function update()
+    cls()
+    print("HELLO BRICKLUA", 1, 1)
+end

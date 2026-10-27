@@ -1,0 +1,12 @@
+display_name = "BrickLua"
+authors = "Pururun26"
+supported_extensions = "brick"
+corename = "BrickLua"
+manufacturer = "Pururun26"
+categories = "Fantasy Console"
+systemname = "BrickLua"
+license = "MIT"
+permissions = ""
+display_version = "1.0.0"
+
+[Features]

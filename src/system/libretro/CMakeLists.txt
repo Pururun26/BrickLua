@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(dotlua_libretro C)
+project(bricklua_libretro C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -53,43 +53,43 @@ set(LUA_SRC
     ${LUA_DIR}/lzio.c
 )
 
-add_library(dotlua_libretro SHARED
-    src/dotlua_libretro.c
-    src/dotlua_api.c
-    src/dotlua_api_lua.c
+add_library(bricklua_libretro SHARED
+    src/bricklua_libretro.c
+    src/bricklua_api.c
+    src/bricklua_api_lua.c
     src/palette.c
     src/video.c
     ${LUA_SRC}
 )
 
-target_include_directories(dotlua_libretro PRIVATE
+target_include_directories(bricklua_libretro PRIVATE
     libretro-common/include
     src
     ${LUA_DIR}
 )
 
-set_target_properties(dotlua_libretro PROPERTIES PREFIX "")
+set_target_properties(bricklua_libretro PROPERTIES PREFIX "")
 
 if(WIN32)
-    set_target_properties(dotlua_libretro PROPERTIES
+    set_target_properties(bricklua_libretro PROPERTIES
         SUFFIX ".dll"
-        LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/dotlua_libretro.def")
-    target_link_options(dotlua_libretro PRIVATE
+        LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/bricklua_libretro.def")
+    target_link_options(bricklua_libretro PRIVATE
         -static -static-libgcc -static-libstdc++
         -Wl,--gc-sections
         -s)
-    target_link_libraries(dotlua_libretro PRIVATE -lpthread)
-    target_link_libraries(dotlua_libretro PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/dotlua_libretro.def")
+    target_link_libraries(bricklua_libretro PRIVATE -lpthread)
+    target_link_libraries(bricklua_libretro PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/bricklua_libretro.def")
 elseif(APPLE)
-    set_target_properties(dotlua_libretro PROPERTIES SUFFIX ".dylib")
-    target_link_options(dotlua_libretro PRIVATE
+    set_target_properties(bricklua_libretro PROPERTIES SUFFIX ".dylib")
+    target_link_options(bricklua_libretro PRIVATE
         -Wl,-dead_strip
         -Wl,-x
         -Wl,-S)
 else()
-    set_target_properties(dotlua_libretro PROPERTIES SUFFIX ".so")
-    target_link_options(dotlua_libretro PRIVATE
+    set_target_properties(bricklua_libretro PROPERTIES SUFFIX ".so")
+    target_link_options(bricklua_libretro PRIVATE
         -Wl,--gc-sections
         -Wl,--as-needed
         -Wl,-O1

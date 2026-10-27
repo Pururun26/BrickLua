@@ -1,7 +1,7 @@
 #include "libretro.h"
 #include "video.h"
-#include "dotlua_api.h"
-#include "dotlua_api_lua.h"
+#include "bricklua_api.h"
+#include "bricklua_api_lua.h"
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -68,33 +68,32 @@ RETRO_API void retro_set_input_state(retro_input_state_t cb)        { input_stat
 
 RETRO_API void retro_get_system_info(struct retro_system_info *info) {
     memset(info, 0, sizeof(*info));
-    info->library_name     = "DotLua";
-    info->library_version  = "1.0.2";
+    info->library_name     = "BrickLua";
+    info->library_version  = "1.0.0";
     info->need_fullpath    = false;
-    info->valid_extensions = "dlua";
+    info->valid_extensions = "brick";
     info->block_extract    = false;
 }
 
 RETRO_API void retro_get_system_av_info(struct retro_system_av_info *info) {
     memset(info, 0, sizeof(*info));
-    info->geometry.base_width   = DOTLUA_W;
-    info->geometry.base_height  = DOTLUA_H;
-    info->geometry.max_width    = DOTLUA_W;
-    info->geometry.max_height   = DOTLUA_H;
-    info->geometry.aspect_ratio = (float)DOTLUA_W / (float)DOTLUA_H;
+    info->geometry.base_width   = BRICKLUA_W;
+    info->geometry.base_height  = BRICKLUA_H;
+    info->geometry.max_width    = BRICKLUA_W;
+    info->geometry.max_height   = BRICKLUA_H;
+    info->geometry.aspect_ratio = (float)BRICKLUA_W / (float)BRICKLUA_H;
     info->timing.fps            = 30.0;
-    info->timing.sample_rate    = 44100.0;
-    info->timing.sample_rate    = DOTLUA_SAMPLE_RATE;
+    info->timing.sample_rate    = BRICKLUA_SAMPLE_RATE;
 }
 
 RETRO_API void retro_init(void) {
     enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
     environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt);
-    dotlua_video_init();
+    bricklua_video_init();
 }
 
 RETRO_API void retro_deinit(void) {
-    dotlua_video_deinit();
+    bricklua_video_deinit();
 }
 
 RETRO_API void retro_reset(void) {
@@ -109,8 +108,8 @@ RETRO_API void retro_reset(void) {
     if (g_cart_data && g_cart_size > 0) {
         g_L = luaL_newstate();
         if (g_L) {
-            dotlua_openlibs(g_L);
-            dotlua_register_api(g_L);
+            bricklua_openlibs(g_L);
+            bricklua_register_api(g_L);
 
             if (luaL_loadbuffer(g_L, g_cart_data, g_cart_size, "cart") != LUA_OK) {
                 retro_log(RETRO_LOG_ERROR, "DotLua: reset load error: %s",
@@ -125,7 +124,7 @@ RETRO_API void retro_reset(void) {
                 lua_close(g_L);
                 g_L = NULL;
             } else {
-                dotlua_time_reset();
+                bricklua_time_reset();
                 retro_log(RETRO_LOG_INFO, "DotLua: cartridge reset");
             }
         }
@@ -152,8 +151,8 @@ RETRO_API bool retro_load_game(const struct retro_game_info *game) {
         return false;
     }
 
-    dotlua_openlibs(g_L);
-    dotlua_register_api(g_L);
+    bricklua_openlibs(g_L);
+    bricklua_register_api(g_L);
 
     retro_log(RETRO_LOG_INFO, "DotLua: cartridge prepared (%zu bytes)", g_cart_size);
     return true;
@@ -197,12 +196,12 @@ RETRO_API void retro_run(void) {
         if (dt > 0.1) dt = 0.1;
         if (dt < 0.0) dt = 0.0;
 
-        int frames = (int)(dt * DOTLUA_SAMPLE_RATE);
+        int frames = (int)(dt * BRICKLUA_SAMPLE_RATE);
         if (frames > 4096) frames = 4096;
 
         if (frames > 0) {
             static int16_t buf[4096 * 2];
-            dotlua_audio_render(buf, frames);
+            bricklua_audio_render(buf, frames);
             audio_batch_cb(buf, (size_t)frames);
         }
     }
@@ -222,7 +221,7 @@ RETRO_API void retro_run(void) {
             lua_close(g_L);
             g_L = NULL;
         } else {
-            dotlua_time_reset(); /* time() = 0 в первом update() */
+            bricklua_time_reset(); /* time() = 0 в первом update() */
             retro_log(RETRO_LOG_INFO, "DotLua: cartridge loaded");
         }
     }
@@ -232,7 +231,7 @@ RETRO_API void retro_run(void) {
     if (now - g_last_update_us >= FRAME_INTERVAL_MIN_US) {
         g_last_update_us = now;
 
-        dotlua_btn_update(read_buttons());
+        bricklua_btn_update(read_buttons());
 
         if (g_L) {
             lua_getglobal(g_L, "update");
@@ -248,10 +247,10 @@ RETRO_API void retro_run(void) {
         }
     }
 
-    video_cb(dotlua_video_get_framebuffer(),
-             dotlua_video_get_width(),
-             dotlua_video_get_height(),
-             dotlua_video_get_pitch());
+    video_cb(bricklua_video_get_framebuffer(),
+             bricklua_video_get_width(),
+             bricklua_video_get_height(),
+             bricklua_video_get_pitch());
 }
 
 RETRO_API void retro_set_controller_port_device(unsigned port, unsigned device) {
@@ -277,11 +276,11 @@ RETRO_API bool retro_load_game_special(unsigned type,
 RETRO_API unsigned retro_get_region(void) { return RETRO_REGION_NTSC; }
 
 RETRO_API void *retro_get_memory_data(unsigned id) {
-    if (id == RETRO_MEMORY_SAVE_RAM) return dotlua_save_data();
+    if (id == RETRO_MEMORY_SAVE_RAM) return bricklua_save_data();
     return NULL;
 }
 
 RETRO_API size_t retro_get_memory_size(unsigned id) {
-    if (id == RETRO_MEMORY_SAVE_RAM) return dotlua_save_size();
+    if (id == RETRO_MEMORY_SAVE_RAM) return bricklua_save_size();
     return 0;
 }

@@ -2,27 +2,28 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define DOTLUA_W 96
-#define DOTLUA_H 96
+/* Экран BrickLua: 240x160 (20x20 сетка кубиков + панель текста) */
+#define BRICKLUA_W 240
+#define BRICKLUA_H 160
 
-/* Прямой доступ к 0/1 framebuffer (DOTLUA_W × DOTLUA_H байт, row-major).
+/* Прямой доступ к 0/1 framebuffer (BRICKLUA_W × BRICKLUA_H байт, row-major).
  * Caller отвечает за bounds-check. Используется для быстрых примитивов. */
-unsigned char *dotlua_video_fb(void);
+unsigned char *bricklua_video_fb(void);
 
-void        dotlua_video_init(void);
-void        dotlua_video_deinit(void);
+void        bricklua_video_init(void);
+void        bricklua_video_deinit(void);
 
 /* Залить весь fb цветом (0 или 1). */
-void        dotlua_video_clear(int color);
+void        bricklua_video_clear(int color);
 
 /* Поставить пиксель (0 или 1), клипается по границам. */
-void        dotlua_video_pset(int x, int y, int color);
+void        bricklua_video_pset(int x, int y, int color);
 
 /* Прочитать пиксель, 0 или 1. */
-int         dotlua_video_pget(int x, int y);
+int         bricklua_video_pget(int x, int y);
 
 /* Готовый буфер для video_cb() — XRGB8888, width*height*4 байт. */
-const void *dotlua_video_get_framebuffer(void);
-unsigned    dotlua_video_get_width(void);
-unsigned    dotlua_video_get_height(void);
-size_t      dotlua_video_get_pitch(void);   /* width * 4 */
+const void *bricklua_video_get_framebuffer(void);
+unsigned    bricklua_video_get_width(void);
+unsigned    bricklua_video_get_height(void);
+size_t      bricklua_video_get_pitch(void);   /* width * 4 */

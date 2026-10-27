@@ -7,7 +7,7 @@
 #define FONT_FIRST  32
 #define FONT_COUNT  64
 
-static const unsigned char dotlua_font[64][4] = {
+static const unsigned char bricklua_font[64][4] = {
     /*  #32 */ {0x00,0x00,0x00,0x00},
     /*  '!' */ {0x04,0x04,0x00,0x04},
     /*  '"' */ {0x05,0x05,0x00,0x00},
@@ -74,7 +74,7 @@ static const unsigned char dotlua_font[64][4] = {
     /*  '_' */ {0x00,0x00,0x00,0x07},
 };
 
-static const unsigned char dotlua_font_w[64] = {
+static const unsigned char bricklua_font_w[64] = {
     2,1,3,3,3,3,3,2,2,2,3,3,2,3,1,3,
     3,3,3,3,3,3,3,3,3,3,1,2,2,3,2,3,
     3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,

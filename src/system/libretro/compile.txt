@@ -1,5 +1,5 @@
 Windows (MSYS2)
-C:\home\pururun\Dev\DotLua\src\system\libretro
+C:\home\pururun\Dev\BrickLua\src\system\libretro
 rm -rf build-libretro
 cmake -S . -B build-libretro -DCMAKE_BUILD_TYPE=Release
 cmake --build build-libretro
@@ -7,7 +7,7 @@ ls -lh build-libretro/dotlua_libretro.dll
 
 
 LINUX
-cd /mnt/c/home/pururun/Dev/DotLua/src/system/libretro
+cd /mnt/c/home/pururun/Dev/BrickLua/src/system/libretro
 rm -rf build-linux
 cmake -S . -B build-linux -DCMAKE_BUILD_TYPE=Release
 cmake --build build-linux
