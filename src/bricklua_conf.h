@@ -23,4 +23,4 @@
 /* Максимальный размер картриджа в байтах. Больше — не запускаемся. */
 #define BRICKLUA_MAX_SCRIPT_SIZE 65536
 
-#define BRICKLUA_VERSION "1.0.2"
+#define BRICKLUA_VERSION "1.1.0"
