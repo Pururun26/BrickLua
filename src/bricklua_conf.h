@@ -20,7 +20,10 @@
 #define BRICKLUA_DEFAULT_COLOR_0   0x9ead86FF   /* фон #9ead86 */
 #define BRICKLUA_DEFAULT_COLOR_1   0x1A1A1AFF   /* передний план #1a1a1a */
 
+/* Третий цвет: только для ядра (блеклые кирпичики) */
+#define BRICKLUA_COLOR_GHOST     0x879372FF // Темно-зеленоватый, чуть темнее фона
+
 /* Максимальный размер картриджа в байтах. Больше — не запускаемся. */
 #define BRICKLUA_MAX_SCRIPT_SIZE 65536
 
-#define BRICKLUA_VERSION "1.1.0"
+#define BRICKLUA_VERSION "1.2.0"

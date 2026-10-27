@@ -1,0 +1,23 @@
+cam_x = 0
+cam_y = 0
+
+function camera(x, y)
+    cam_x = x or 0
+    cam_y = y or 0
+end
+
+x = 9
+y = 9
+
+function update()
+    if btn(0) then x = x - 1 end
+    if btn(1) then x = x + 1 end
+    if btn(2) then y = y - 1 end
+    if btn(3) then y = y + 1 end
+
+    cls()
+    camera(x-9, y-9)
+    pset(x - cam_x, y - cam_y)
+    pset(14 - cam_x, 5 - cam_y)
+    pset(14 - cam_x, 20 - cam_y)
+end

@@ -13,6 +13,27 @@ Color         g_palette[BRICKLUA_COLOR_COUNT];
 static Color   g_pixels[BRICKLUA_WIDTH * BRICKLUA_HEIGHT];
 static Texture2D g_tex;
 
+// Вынесите это на уровень файла (до всех функций)
+static const char* CUBE_PATTERN[7] = {
+    "1111111",
+    "1000001",
+    "1011101",
+    "1011101",
+    "1011101",
+    "1000001",
+    "1111111"
+};
+
+// И добавьте вспомогательную функцию:
+static int is_ghost_pixel(int x, int y) {
+    int lx = x % 8;
+    int ly = y % 8;
+    if (lx < 7 && ly < 7) {
+        return (CUBE_PATTERN[ly][lx] == '1');
+    }
+    return 0;
+}
+
 void bricklua_api_init(void) {
     bricklua_time_reset();               /* <-- сброс g_start_ms */
     g_palette[0] = GetColor(BRICKLUA_DEFAULT_COLOR_0);
@@ -34,21 +55,38 @@ void bricklua_api_shutdown(void) {
 }
 
 void bricklua_present(void) {
-    // 1. Формируем массив пикселей с рамкой
+    // Получаем цвет для призрачных кирпичей (через палитру Raylib)
+    Color ghost_color = GetColor(BRICKLUA_COLOR_GHOST);
+
+    // 1. Формируем массив пикселей
     for (int i = 0; i < BRICKLUA_WIDTH * BRICKLUA_HEIGHT; i++) {
         int x = i % BRICKLUA_WIDTH;
         int y = i / BRICKLUA_WIDTH;
 
-        // Условия для рамки (цвет переднего плана, g_palette[1]):
-        // - Левая стена (x == 0)
-        // - Правая стена всего экрана (x == 239)
-        // - Верхняя стена (y == 0)
-        // - Нижняя стена (y == 159)
-        // - Разделитель между игрой и текстом (x == 159)
-        if (x == 0 || x == 239 || y == 0 || y == 159 || x == 159) {
-            g_pixels[i] = g_palette[1];
-        } else {
-            // Внутри рамок выводим буфер игры
+        if (y == 159) {
+            // Нижняя граница: делаем её черной (сливается с фоном окна)
+            g_pixels[i] = BLACK;
+        } 
+        else if (x == 159) {
+            // Только разделитель между игрой и текстом: делаем её черной (сливается с фоном окна)
+            g_pixels[i] = BLACK;
+        } 
+        else if (x < 159) {
+            // Левая панель (Игровое поле, x от 0 до 158)
+            if (g_fb[i] & 1) {
+                // Активный кирпич
+                g_pixels[i] = g_palette[1];
+            } else if (is_ghost_pixel(x, y)) {
+                // Призрачный кирпич (блеклый)
+                g_pixels[i] = ghost_color;
+            } else {
+                // Пустое место
+                g_pixels[i] = g_palette[0];
+            }
+        } 
+        else {
+            // Правая панель (Текст, x от 160 до 239)
+            // Здесь нет ни рамок, ни сетки. Только текст.
             g_pixels[i] = g_palette[g_fb[i] & (BRICKLUA_COLOR_COUNT - 1)];
         }
     }
@@ -163,17 +201,6 @@ int64_t bricklua_utime(void) {
     return (int64_t)time(NULL);
 }
 
-
-/* ---------- BRICK (7x7 block, 1px gap, no offsets) ---------- */
-static const char* CUBE_PATTERN[7] = {
-    "1111111",
-    "1000001",
-    "1011101",
-    "1011101",
-    "1011101",
-    "1000001",
-    "1111111"
-};
 
 void bricklua_brick(int gx, int gy, int color) {
     // Теперь сетка 20x20 (левая часть 160x160)
