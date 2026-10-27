@@ -16,7 +16,17 @@
 void bricklua_cls  (int color);
 void bricklua_pset (int x, int y, int color);
 int  bricklua_pget (int x, int y);
+
 void bricklua_brick(int gx, int gy, int color);
+
+void bricklua_line(int x0, int y0, int x1, int y1);
+void bricklua_rect(int x, int y, int w, int h, int filled);
+void bricklua_oval(int x, int y, int w, int h, int filled);
+
+/* --- Brick Sprites --- */
+void bricklua_sprdata(int id, const char *art);
+void bricklua_spr(int id, int gx, int gy);
+
 void bricklua_print(const char *s, int x, int y, int color);
 
 /* Ввод: 6 кнопок (0..5). */

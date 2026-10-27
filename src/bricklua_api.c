@@ -210,6 +210,158 @@ void bricklua_cls_grid(int color) {
 }
 
 
+/* ---------- BRICK SPRITES (4x4) ---------- */
+#define MAX_BRICK_SPRITES 64
+#define BRICK_SPRITE_SIZE 4
+
+static uint8_t g_brick_sprites[MAX_BRICK_SPRITES][BRICK_SPRITE_SIZE][BRICK_SPRITE_SIZE];
+
+void bricklua_sprdata(int id, const char *art) {
+    if (id < 0 || id >= MAX_BRICK_SPRITES || !art) return;
+
+    // Очищаем спрайт перед загрузкой (0 = пустота)
+    memset(g_brick_sprites[id], 0, sizeof(g_brick_sprites[id]));
+
+    int row = 0, col = 0;
+    for (const unsigned char *p = (const unsigned char *)art; *p; ) {
+        if (*p == '\n') {
+            if (col > 0) { row++; col = 0; } // Переход на новую строку
+            p++;
+            continue;
+        }
+        if (*p == '\r') { p++; continue; }
+
+        unsigned char v;
+        // # или 1 — это кирпич
+        if (p[0] == '#' || p[0] == '1') {
+            v = 1;
+        } 
+        // 0, точка или пробел — пустота (фон)
+        else if (p[0] == '0' || p[0] == '.' || p[0] == ' ') {
+            v = 0;
+        } 
+        // Неизвестный символ — пропускаем, чтобы не ломать строку
+        else { 
+            p++; 
+            continue; 
+        }
+
+        if (row < BRICK_SPRITE_SIZE && col < BRICK_SPRITE_SIZE) {
+            g_brick_sprites[id][row][col] = v;
+        }
+
+        col++;
+        p++;
+    }
+}
+
+void bricklua_spr(int id, int gx, int gy) {
+    if (id < 0 || id >= MAX_BRICK_SPRITES) return;
+
+    for (int y = 0; y < BRICK_SPRITE_SIZE; y++) {
+        for (int x = 0; x < BRICK_SPRITE_SIZE; x++) {
+            // Рисуем только если там есть кирпич (1)
+            if (g_brick_sprites[id][y][x] == 1) {
+                bricklua_brick(gx + x, gy + y, 1);
+            }
+        }
+    }
+}
+
+
+/* ---------- line (bricks) ---------- */
+void bricklua_line(int x0, int y0, int x1, int y1) {
+    int dx = abs(x1 - x0);
+    int sx = (x0 < x1) ? 1 : -1;
+    int dy = -abs(y1 - y0);
+    int sy = (y0 < y1) ? 1 : -1;
+    int err = dx + dy;
+
+    for (;;) {
+        bricklua_brick(x0, y0, 1);
+        if (x0 == x1 && y0 == y1) break;
+        int e2 = 2 * err;
+        if (e2 >= dy) { err += dy; x0 += sx; }
+        if (e2 <= dx) { err += dx; y0 += sy; }
+    }
+}
+
+/* ---------- rect (bricks) ---------- */
+void bricklua_rect(int x, int y, int w, int h, int filled) {
+    if (w <= 0 || h <= 0) return;
+    int x_end = x + w - 1;
+    int y_end = y + h - 1;
+
+    if (filled) {
+        for (int yy = y; yy <= y_end; yy++) {
+            for (int xx = x; xx <= x_end; xx++) {
+                bricklua_brick(xx, yy, 1);
+            }
+        }
+    } else {
+        for (int xx = x; xx <= x_end; xx++) {
+            bricklua_brick(xx, y, 1);     // Верх
+            bricklua_brick(xx, y_end, 1); // Низ
+        }
+        for (int yy = y + 1; yy < y_end; yy++) {
+            bricklua_brick(x, yy, 1);     // Лево
+            bricklua_brick(x_end, yy, 1); // Право
+        }
+    }
+}
+
+/* ---------- oval (bricks) ---------- */
+void bricklua_oval(int x, int y, int w, int h, int filled) {
+    if (w <= 0 || h <= 0) return;
+
+    double cx = x + w / 2.0;
+    double cy = y + h / 2.0;
+    double rx = w / 2.0;
+    double ry = h / 2.0;
+    if (rx < 0.5) rx = 0.5;
+    if (ry < 0.5) ry = 0.5;
+
+    // Радиус внутреннего круга (для создания пустоты)
+    double inner_rx = rx - 1.0;
+    double inner_ry = ry - 1.0;
+
+    for (int py = y; py < y + h; py++) {
+        double dy = (py + 0.5 - cy) / ry;
+        if (dy < -1.0 || dy > 1.0) continue;
+        double dx = sqrt(1.0 - dy * dy) * rx;
+
+        int xs = (int)(cx - dx + 0.5);
+        int xe = (int)(cx + dx + 0.5);
+
+        // По умолчанию считаем, что внутренней дырки на этой строке нет
+        int inner_xs = 9999;
+        int inner_xe = -9999;
+
+        if (!filled && inner_rx > 0.0 && inner_ry > 0.0) {
+            double inner_dy = (py + 0.5 - cy) / inner_ry;
+            // Если мы внутри внутреннего круга по вертикали
+            if (inner_dy >= -1.0 && inner_dy <= 1.0) {
+                double inner_dx = sqrt(1.0 - inner_dy * inner_dy) * inner_rx;
+                inner_xs = (int)(cx - inner_dx + 0.5);
+                inner_xe = (int)(cx + inner_dx + 0.5);
+            }
+        }
+
+        // Рисуем строку
+        for (int px = xs; px <= xe; px++) {
+            if (filled) {
+                bricklua_brick(px, py, 1);
+            } else {
+                // Рисуем только если пиксель НЕ попал внутрь дырки
+                if (px < inner_xs || px > inner_xe) {
+                    bricklua_brick(px, py, 1);
+                }
+            }
+        }
+    }
+}
+
+
 /* ---------- buttons ---------- */
 static int prev_btn = 0;
 static int curr_btn = 0;

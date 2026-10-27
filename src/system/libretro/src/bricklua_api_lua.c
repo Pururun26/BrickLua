@@ -22,6 +22,47 @@ static int l_pget(lua_State *L) {
     return 1;
 }
 
+static int l_line(lua_State *L) {
+    bricklua_line(
+        (int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+        (int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4)
+    );
+    return 0;
+}
+
+static int l_rect(lua_State *L) {
+    bricklua_rect(
+        (int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+        (int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4),
+        lua_toboolean(L, 5) // true / false
+    );
+    return 0;
+}
+
+static int l_oval(lua_State *L) {
+    bricklua_oval(
+        (int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+        (int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4),
+        lua_toboolean(L, 5) // true / false
+    );
+    return 0;
+}
+
+static int l_sprdata(lua_State *L) {
+    int id = (int)luaL_checkinteger(L, 1);
+    const char *art = luaL_checkstring(L, 2);
+    bricklua_sprdata(id, art);
+    return 0;
+}
+
+static int l_spr(lua_State *L) {
+    int id = (int)luaL_checkinteger(L, 1);
+    int gx = (int)luaL_checkinteger(L, 2);
+    int gy = (int)luaL_checkinteger(L, 3);
+    bricklua_spr(id, gx, gy);
+    return 0;
+}
+
 // Текст ТОЛЬКО в правой панели
 static int l_print(lua_State *L) {
     const char *s = luaL_checkstring(L, 1);
@@ -89,6 +130,11 @@ static const luaL_Reg api_funcs[] = {
     {"cls",     l_cls},
     {"pset",    l_pset},
     {"pget",    l_pget},
+    {"line",    l_line},
+    {"rect",    l_rect},
+    {"oval",    l_oval},
+    {"sprdata", l_sprdata},
+    {"spr",     l_spr},
     {"print",   l_print},
     {"btn",     l_btn},
     {"time",    l_time},

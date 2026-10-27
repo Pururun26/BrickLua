@@ -1,13 +1,14 @@
 # BrickLua
 
-A tiny fantasy console for Lua in the style of the classic Brick Game. 
-240×160 resolution (20×20 grid of 8×8 bricks + text panel), 2 colors, 64 KB per cartridge.
+A tiny fantasy console for Lua in the style of the classic Brick Game. 240×160 resolution (20×20 grid of 8×8 bricks + text panel), 2 colors.
 
-- One `.brick` file — the entire game (code + data)
+- One `.brick` file — the entire game.
+- **No assets, just code.** No sprites, no maps, no music files — only pure Lua and the 8×8 brick.
 - Lua 5.4.9, without `io`/`os`/`package`/`debug`
 - 2-color palette (bg `#9ead86`, fg `#1a1a1a`)
-- **20×20 grid of 8×8 bricks** (left side) + dedicated text panel (right side)
 - Single-channel sound (square wave)
+- **DAS (Delayed Auto Shift)** input — one `btn` function for everything
+- Up to 64 KB of pure code per cartridge (more than enough for a 20×20 grid)
 
 ## Build
 
@@ -69,10 +70,7 @@ function update()
 end
 ```
 
-`pack.py` bundles everything into a single file:
-```bash
-python tools/pack.py examples/my_game/main.brick -o build-native/run.brick
-```
+`pack.py` bundles everything into a single file.
 
 ## Controls
 
@@ -98,20 +96,55 @@ F11 — fullscreen. Ctrl+P — FPS overlay.
 | color `0` | background `#9ead86` |
 | color `1` | foreground `#1a1a1a` |
 
-### Graphics
+### Graphics & Primitives
 
 The screen is divided into two zones: the **Game Grid** (left, 20×20 cells) and the **Text Panel** (right, 80 pixels wide). 
 
+All drawing functions operate on the **grid coordinates (0..19)**. You are not drawing pixels; you are placing 8×8 bricks.
+
 ```lua
 cls(color)                -- fill the ENTIRE screen with color (0 or 1)
-pset(x, y, color)         -- place an 8×8 brick at grid coordinates (0..19)
+pset(x, y, color)         -- place an 8×8 brick at grid coordinates
 pget(x, y)                -- read brick at grid coordinates, returns 0 or 1
 print(s, x, y, color)     -- text, 3×4 font (x offset starts at 160px)
 ```
 
-- **`pset` / `pget`**: Works strictly on the 20×20 grid. `(0,0)` is top-left, `(19,19)` is bottom-right. Out-of-bounds coordinates are safely ignored.
-- **`print`**: Text is automatically shifted to the right panel. `x=0` means the left edge of the text panel. `y` is in pixels. Uppercase only.
-- **`cls`**: Clears everything (both the grid and the text panel).
+#### Primitive Shapes
+All shapes are drawn using our signature 8×8 bricks. For `rect` and `oval`, the last argument is a boolean (`true` = filled, `false`/`nil` = hollow outline).
+
+```lua
+line(x0, y0, x1, y1)           -- draws a line of bricks
+rect(x, y, w, h, [filled])     -- draws a rectangle
+oval(x, y, w, h, [filled])     -- draws an ellipse (w==h = circle)
+```
+
+**Examples:**
+```lua
+rect(2, 2, 8, 8)        -- Hollow rectangle (outline only)
+rect(2, 2, 8, 8, true)  -- Filled rectangle
+oval(5, 5, 4, 4)        -- Hollow circle
+oval(5, 5, 4, 4, true)  -- Filled circle
+```
+
+#### Brick Sprites (4×4)
+Need a complex shape (like a car or a Tetris piece)? Draw it once and stamp it anywhere. Sprites are strictly **4×4 bricks** in size.
+
+```lua
+sprdata(id, art)       -- load a 4×4 sprite into slot id (0..63)
+spr(id, x, y)          -- draw the sprite at grid coordinates
+```
+
+`art` is a 4×4 string. `#` or `1` means a brick is placed; `0`, `.`, or space means empty.
+
+```lua
+sprdata(0, [[
+0#00
+###0
+0#00
+###0
+]])
+spr(0, 10, 10) -- Draws the car at grid position (10, 10)
+```
 
 ### Input
 
@@ -167,7 +200,7 @@ food_x, food_y = math.random(0, 19), math.random(0, 19)
 score = 0
 
 function update()
-    -- Move player (using auto-repeat)
+    -- Move player
     if btn(0) then px = px - 1 end
     if btn(1) then px = px + 1 end
     if btn(2) then py = py - 1 end
@@ -189,12 +222,17 @@ function update()
 
     -- Render
     cls(0)
-    pset(px, py, 1)           -- Player
-    pset(food_x, food_y, 1)   -- Food
+    
+    -- Draw player (filled rect) and food (filled circle)
+    rect(px, py, 1, 1, true)
+    oval(food_x, food_y, 1, 1, true)
+    
+    -- Draw a border around the game grid
+    rect(0, 0, 20, 20)
     
     -- UI (Right Panel)
     print("SCORE", 2, 10, 1)
-    print(tostring(score), 2, 16, 1)
+    print(score, 2, 16, 1)
 end
 ```
 
@@ -203,40 +241,13 @@ end
 - 240×160 resolution (20×20 grid + 80px text panel)
 - 2 colors strictly
 - 65536 characters per cartridge
-- No sprites, no lines, no rectangles — only the 8×8 brick
+- No external assets, no image loading, no music files
 - 64 save slots × 8 bytes
 - No `require` — modules via `--[[file.lua]]`
 - No `io`/`os`/`package`/`debug` — sandboxed
-- No network, no file I/O (except cartridge loading)
-
-## Project layout
-
-```
-src/
-  bricklua.c             — main, window, loop, log
-  bricklua_conf.h        — constants (WIDTH, FPS, colors)
-  bricklua_api.c/.h      — C implementation of the API
-  bricklua_api_lua.c/.h  — Lua bindings
-  bricklua_log.c/.h      — logging (file on desktop, console.log on web)
-  bricklua_save.c/.h     — dset/dget (file on desktop, localStorage on web)
-  bricklua_font3x4.h     — font
-web/
-  shell.html           — web shell (fetch cart.brick, canvas CSS)
-tools/
-  pack.py              — builds .brick from main + modules
-examples/
-  snake.brick           — snake
-  ...                  — other examples
-```
-
-## Build outputs
-
-- `build-native/bricklua.exe` — desktop binary
-- `build-native/bricklua_log.txt` — log of the last run
-- `build-native/save/<name>.bin` — save data
-- `build-web/index.html` + `.js` + `.wasm` — web build
 
 ## License
 
 MIT — see [LICENSE](LICENSE).
 Bundled: Lua 5.4.9 (MIT), raylib 6.0 (zlib) — full texts in `--license`.
+```

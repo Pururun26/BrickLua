@@ -50,6 +50,52 @@ static int l_print(lua_State *L) {
     return 0;
 }
 
+static int l_sprdata(lua_State *L) {
+    int id = (int)luaL_checkinteger(L, 1);
+    const char *art = luaL_checkstring(L, 2);
+    bricklua_sprdata(id, art);
+    return 0;
+}
+
+static int l_spr(lua_State *L) {
+    int id = (int)luaL_checkinteger(L, 1);
+    int gx = (int)luaL_checkinteger(L, 2);
+    int gy = (int)luaL_checkinteger(L, 3);
+    bricklua_spr(id, gx, gy);
+    return 0;
+}
+
+static int l_line(lua_State *L) {
+    bricklua_line(
+        (int)luaL_checkinteger(L, 1), (int)luaL_checkinteger(L, 2),
+        (int)luaL_checkinteger(L, 3), (int)luaL_checkinteger(L, 4)
+    );
+    return 0;
+}
+
+static int l_rect(lua_State *L) {
+    int x = (int)luaL_checkinteger(L, 1);
+    int y = (int)luaL_checkinteger(L, 2);
+    int w = (int)luaL_checkinteger(L, 3);
+    int h = (int)luaL_checkinteger(L, 4);
+    // Если 5-й аргумент не передан (nil) или false — вернет 0, если true — вернет 1
+    int filled = lua_toboolean(L, 5); 
+    
+    bricklua_rect(x, y, w, h, filled);
+    return 0;
+}
+
+static int l_oval(lua_State *L) {
+    int x = (int)luaL_checkinteger(L, 1);
+    int y = (int)luaL_checkinteger(L, 2);
+    int w = (int)luaL_checkinteger(L, 3);
+    int h = (int)luaL_checkinteger(L, 4);
+    int filled = lua_toboolean(L, 5);
+    
+    bricklua_oval(x, y, w, h, filled);
+    return 0;
+}
+
 static int l_time(lua_State *L) {
     lua_pushinteger(L, (lua_Integer)bricklua_time());
     return 1;
@@ -93,6 +139,11 @@ static const luaL_Reg api_funcs[] = {
     {"pset",    l_pset},
     {"pget",    l_pget},
     {"print",   l_print},
+    {"sprdata", l_sprdata},
+    {"spr",     l_spr},
+    {"line",    l_line},
+    {"rect",    l_rect},
+    {"oval",    l_oval},
     {"time",    l_time},
     {"utime",   l_utime},
     {"btn",     l_btn},

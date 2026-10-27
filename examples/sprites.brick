@@ -1,0 +1,19 @@
+sprdata(0, [[
+0#00
+###0
+0#00
+###0
+]])
+
+local x = 7
+local y = 7
+
+function update()
+    if btn(0) then x = x - 1 end
+    if btn(1) then x = x + 1 end
+    if btn(2) then y = y - 1 end
+    if btn(3) then y = y + 1 end
+
+    cls()
+    spr(0, x, y)
+end
