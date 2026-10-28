@@ -140,12 +140,12 @@ void bricklua_cls(int color) {
         g_fb[i] = c;
 }
 
-void bricklua_pset(int x, int y, int color) {
+void bricklua_bset(int x, int y, int color) {
     if (x < 0 || x >= BRICKLUA_WIDTH || y < 0 || y >= BRICKLUA_HEIGHT) return;
     g_fb[y * BRICKLUA_WIDTH + x] = (unsigned char)(color & (BRICKLUA_COLOR_COUNT - 1));
 }
 
-int bricklua_pget(int x, int y) {
+int bricklua_bget(int x, int y) {
     if (x < 0 || x >= BRICKLUA_WIDTH || y < 0 || y >= BRICKLUA_HEIGHT) return 0;
     return (int)g_fb[y * BRICKLUA_WIDTH + x];
 }
@@ -169,7 +169,7 @@ void bricklua_print(const char *s, int x, int y, int color) {
             unsigned char bits = bricklua_font[idx][row];
             for (int col = 0; col < FONT_CELL_W; col++) {
                 if ((bits >> (FONT_CELL_W - 1 - col)) & 1)
-                    bricklua_pset(cx + col, cy + row, color);
+                    bricklua_bset(cx + col, cy + row, color);
             }
         }
 
@@ -212,14 +212,14 @@ void bricklua_brick(int gx, int gy, int color) {
     if (color == 0) {
         for (int y = 0; y < 7; y++) {
             for (int x = 0; x < 7; x++) {
-                bricklua_pset(px + x, py + y, 0);
+                bricklua_bset(px + x, py + y, 0);
             }
         }
     } else {
         for (int y = 0; y < 7; y++) {
             for (int x = 0; x < 7; x++) {
                 if (CUBE_PATTERN[y][x] == '1') {
-                    bricklua_pset(px + x, py + y, color);
+                    bricklua_bset(px + x, py + y, color);
                 }
             }
         }

@@ -16,11 +16,11 @@ void        bricklua_video_deinit(void);
 /* Залить весь fb цветом (0 или 1). */
 void        bricklua_video_clear(int color);
 
-/* Поставить пиксель (0 или 1), клипается по границам. */
-void        bricklua_video_pset(int x, int y, int color);
+/* Поставить кирпич (0 или 1), клипается по границам. */
+void        bricklua_video_bset(int x, int y, int color);
 
-/* Прочитать пиксель, 0 или 1. */
-int         bricklua_video_pget(int x, int y);
+/* Прочитать кирпич, 0 или 1. */
+int         bricklua_video_bget(int x, int y);
 
 /* Готовый буфер для video_cb() — XRGB8888, width*height*4 байт. */
 const void *bricklua_video_get_framebuffer(void);

@@ -43,7 +43,7 @@ static void bricklua_openlibs(lua_State *L) {
 }
 
 static int call_update(lua_State *L) {
-    lua_getglobal(L, "update");
+    lua_getglobal(L, "BRICK");
     if (!lua_isfunction(L, -1)) {
         lua_pop(L, 1);
         return 0;

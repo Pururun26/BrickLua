@@ -20,8 +20,8 @@ int  bricklua_fps_get(void);
 
 void bricklua_cls (int color);
 void bricklua_print(const char *s, int x, int y, int color);
-void bricklua_pset(int x, int y, int color);
-int  bricklua_pget(int x, int y);
+void bricklua_bset(int x, int y, int color);
+int  bricklua_bget(int x, int y);
 
 void bricklua_sprdata(int id, const char *art);
 void bricklua_spr(int id, int gx, int gy);

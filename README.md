@@ -1,6 +1,6 @@
 # BrickLua
 
-A tiny fantasy console for Lua in the style of the classic Brick Game. 240×160 resolution (20×20 grid of 8×8 bricks + text panel), 2 colors.
+A tiny fantasy console for Lua in the style of the classic Brick Game. 240×160 resolution (20×20 grid of 8×8 bricks + text panel).
 
 - One `.brick` file — the entire game.
 - **No assets, just code.** No sprites, no maps, no music files — only pure Lua and the 8×8 brick.
@@ -9,6 +9,8 @@ A tiny fantasy console for Lua in the style of the classic Brick Game. 240×160 
 - Single-channel sound (square wave)
 - **DAS (Delayed Auto Shift)** input — one `btn` function for everything
 - Up to 64 KB of pure code per cartridge (more than enough for a 20×20 grid)
+
+**The API is stable** — function names, signatures, and behavior won't change. Only cosmetic additions (new functions, examples, docs) may appear.
 
 ## Build
 
@@ -48,13 +50,13 @@ A `.brick` file is a regular Lua script with a `.brick` extension. Limit — **6
 ```lua
 --! dfc 1
 
-function update()
-    cls(0)
+function BRICK()
+    cls()
     -- your game
 end
 ```
 
-Top-level code runs once at load. `update()` is called 30 times per second.
+Top-level code runs once at load. `BRICK()` is called 30 times per second.
 
 ## Modules
 
@@ -65,7 +67,7 @@ Multi-file project: `main.brick` + `.lua` modules alongside.
 --[[utils.lua]]
 --[[player.lua]]
 
-function update()
+function BRICK()
     player_update()
 end
 ```
@@ -93,20 +95,18 @@ F11 — fullscreen. Ctrl+P — FPS overlay.
 |---|---|
 | `20` | grid size (20×20 bricks) |
 | `30` | FPS |
-| color `0` | background `#9ead86` |
-| color `1` | foreground `#1a1a1a` |
 
 ### Graphics & Primitives
 
 The screen is divided into two zones: the **Game Grid** (left, 20×20 cells) and the **Text Panel** (right, 80 pixels wide). 
 
-All drawing functions operate on the **grid coordinates (0..19)**. You are not drawing pixels; you are placing 8×8 bricks.
+All drawing functions operate on the **grid coordinates (0..19)**. You are not drawing pixels; you are placing 8×8 bricks. **There are no color arguments.** Everything is drawn in the foreground color.
 
 ```lua
-cls(color)                -- fill the ENTIRE screen with color (0 or 1)
-pset(x, y, color)         -- place an 8×8 brick at grid coordinates
-pget(x, y)                -- read brick at grid coordinates, returns 0 or 1
-print(s, x, y, color)     -- text, 3×4 font (x offset starts at 160px)
+cls()                     -- clear the ENTIRE screen
+bset(x, y)                -- place an 8×8 brick at grid coordinates
+bget(x, y)                -- returns true if a brick exists, false otherwise
+print(s, x, y)            -- text, 3×4 font (x offset starts at 160px)
 ```
 
 #### Primitive Shapes
@@ -199,7 +199,7 @@ px, py = 10, 10
 food_x, food_y = math.random(0, 19), math.random(0, 19)
 score = 0
 
-function update()
+function BRICK()
     -- Move player
     if btn(0) then px = px - 1 end
     if btn(1) then px = px + 1 end
@@ -221,7 +221,7 @@ function update()
     end
 
     -- Render
-    cls(0)
+    cls()
     
     -- Draw player (filled rect) and food (filled circle)
     rect(px, py, 1, 1, true)
@@ -231,15 +231,15 @@ function update()
     rect(0, 0, 20, 20)
     
     -- UI (Right Panel)
-    print("SCORE", 2, 10, 1)
-    print(score, 2, 16, 1)
+    print("SCORE", 2, 10)
+    print(tostring(score), 2, 16)
 end
 ```
 
 ## Limitations
 
 - 240×160 resolution (20×20 grid + 80px text panel)
-- 2 colors strictly
+- No colors (only background and bricks)
 - 65536 characters per cartridge
 - No external assets, no image loading, no music files
 - 64 save slots × 8 bytes

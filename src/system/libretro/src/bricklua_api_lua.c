@@ -4,21 +4,25 @@
 #include "lualib.h"
 
 static int l_cls(lua_State *L) {
-    bricklua_cls((int)luaL_optinteger(L, 1, 0));
+    // Всегда очищаем в 0 (фон)
+    bricklua_cls(0);
     return 0;
 }
 
-static int l_pset(lua_State *L) {
+static int l_bset(lua_State *L) {
+    // Принимает только 2 аргумента: x и y
     bricklua_brick((int)luaL_checkinteger(L, 1),
-                 (int)luaL_checkinteger(L, 2),
-                 (int)luaL_optinteger  (L, 3, 1));
+                   (int)luaL_checkinteger(L, 2),
+                   1); // Всегда ставит кирпич
     return 0;
 }
 
-static int l_pget(lua_State *L) {
-    lua_pushinteger(L, bricklua_pget(
-        (int)luaL_checkinteger(L, 1),
-        (int)luaL_checkinteger(L, 2)));
+static int l_bget(lua_State *L) {
+    int x = (int)luaL_checkinteger(L, 1);
+    int y = (int)luaL_checkinteger(L, 2);
+    // Получаем 0 или 1 из C, и превращаем в false или true для Lua
+    int has_brick = bricklua_bget(x, y);
+    lua_pushboolean(L, has_brick != 0);
     return 1;
 }
 
@@ -68,10 +72,8 @@ static int l_print(lua_State *L) {
     const char *s = luaL_checkstring(L, 1);
     int x = (int)luaL_optinteger(L, 2, 0);
     int y = (int)luaL_optinteger(L, 3, 0);
-    int c = (int)luaL_optinteger(L, 4, 1);
 
-    // Ограничиваем координаты, чтобы текст не вылезал за рамки
-    // Слева и сверху: не уходим в минус (на сетку или на верхнюю рамку)
+    // Ограничения для текста (чтобы не вылезал за рамки)
     if (x < 0) x = 0; 
     if (y < 0) y = 0;
 
@@ -80,8 +82,8 @@ static int l_print(lua_State *L) {
     if (y > 154) y = 154;
     
     // Сдвигаем на 160 пикселей вправо (начало панели UI)
-    // + 1 пиксель по Y, чтобы текст не прилипал к верхней рамке
-    bricklua_print(s, 160 + x, 1 + y, c);
+    // Текст всегда рисуется цветом 1
+    bricklua_print(s, 160 + x, y, 1);
     return 0;
 }
 
@@ -128,8 +130,8 @@ static int l_beep(lua_State *L) {
 
 static const luaL_Reg api_funcs[] = {
     {"cls",     l_cls},
-    {"pset",    l_pset},
-    {"pget",    l_pget},
+    {"bset",    l_bset},
+    {"bget",    l_bget},
     {"line",    l_line},
     {"rect",    l_rect},
     {"oval",    l_oval},

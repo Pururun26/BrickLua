@@ -221,7 +221,7 @@ RETRO_API void retro_run(void) {
             lua_close(g_L);
             g_L = NULL;
         } else {
-            bricklua_time_reset(); /* time() = 0 в первом update() */
+            bricklua_time_reset(); /* time() = 0 в первом BRICK() */
             retro_log(RETRO_LOG_INFO, "BrickLua: cartridge loaded");
         }
     }
@@ -234,7 +234,7 @@ RETRO_API void retro_run(void) {
         bricklua_btn_update(read_buttons());
 
         if (g_L) {
-            lua_getglobal(g_L, "update");
+            lua_getglobal(g_L, "BRICK");
             if (lua_isfunction(g_L, -1)) {
                 if (lua_pcall(g_L, 0, 0, 0) != LUA_OK) {
                     retro_log(RETRO_LOG_ERROR, "BrickLua: update error: %s",

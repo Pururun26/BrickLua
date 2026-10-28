@@ -14,8 +14,8 @@
 
 /* Графика */
 void bricklua_cls  (int color);
-void bricklua_pset (int x, int y, int color);
-int  bricklua_pget (int x, int y);
+void bricklua_bset (int x, int y, int color);
+int  bricklua_bget (int x, int y);
 
 void bricklua_brick(int gx, int gy, int color);
 

@@ -3,40 +3,36 @@
 #include "bricklua_conf.h"
 #include "bricklua_save.h"
 
-// Объявляем новые функции из bricklua_api.c
 static int l_cls(lua_State *L) {
-    int c = (int)luaL_optinteger(L, 1, 0);
-    // Вызываем очистку только игрового поля (левой части)
-    bricklua_cls(c);
+    // Всегда очищаем в 0 (фон)
+    bricklua_cls(0);
     return 0;
 }
 
-static int l_pset(lua_State *L) {
+static int l_bset(lua_State *L) {
     int x = (int)luaL_checkinteger(L, 1);
     int y = (int)luaL_checkinteger(L, 2);
-    int c = (int)luaL_optinteger(L, 3, 1);
-    // Вызываем отрисовку кубика вместо пикселя
-    bricklua_brick(x, y, c);
+    // Всегда ставит кирпич (1). Никаких флагов.
+    bricklua_brick(x, y, 1); 
     return 0;
 }
 
-static int l_pget(lua_State *L) {
+static int l_bget(lua_State *L) {
     int x = (int)luaL_checkinteger(L, 1);
     int y = (int)luaL_checkinteger(L, 2);
-    // Читаем состояние кубика по его центру (4,4 внутри блока 8x8)
-    lua_pushinteger(L, bricklua_pget(x * 8 + 4, y * 8 + 4));
+    // Возвращает true, если там есть кирпич, иначе false
+    lua_pushboolean(L, bricklua_pget(x, y) != 0); 
     return 1;
 }
 
+// Текст ТОЛЬКО в правой панели
 // Текст ТОЛЬКО в правой панели
 static int l_print(lua_State *L) {
     const char *s = luaL_checkstring(L, 1);
     int x = (int)luaL_optinteger(L, 2, 0);
     int y = (int)luaL_optinteger(L, 3, 0);
-    int c = (int)luaL_optinteger(L, 4, 1);
 
-    // Ограничиваем координаты, чтобы текст не вылезал за рамки
-    // Слева и сверху: не уходим в минус (на сетку или на верхнюю рамку)
+    // Ограничения для текста (чтобы не вылезал за рамки)
     if (x < 0) x = 0; 
     if (y < 0) y = 0;
 
@@ -45,8 +41,8 @@ static int l_print(lua_State *L) {
     if (y > 154) y = 154;
     
     // Сдвигаем на 160 пикселей вправо (начало панели UI)
-    // + 1 пиксель по Y, чтобы текст не прилипал к верхней рамке
-    bricklua_print(s, 160 + x, 1 + y, c);
+    // Текст всегда рисуется цветом 1
+    bricklua_print(s, 160 + x, y, 1);
     return 0;
 }
 
@@ -136,8 +132,8 @@ static int l_dget(lua_State *L) {
 
 static const luaL_Reg api_funcs[] = {
     {"cls",     l_cls},
-    {"pset",    l_pset},
-    {"pget",    l_pget},
+    {"bset",    l_bset},
+    {"bget",    l_bget},
     {"print",   l_print},
     {"sprdata", l_sprdata},
     {"spr",     l_spr},
@@ -155,6 +151,6 @@ static const luaL_Reg api_funcs[] = {
 
 void bricklua_register_api(lua_State *L) {
     lua_pushglobaltable(L);          /* _G */
-    luaL_setfuncs(L, api_funcs, 0);  /* adds cls/pset/pget into _G */
+    luaL_setfuncs(L, api_funcs, 0);  /* adds cls/bset/bget into _G */
     lua_pop(L, 1);
 }

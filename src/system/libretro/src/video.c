@@ -40,12 +40,12 @@ void bricklua_video_clear(int color) {
     memset(g_fb, c, sizeof(g_fb));
 }
 
-void bricklua_video_pset(int x, int y, int color) {
+void bricklua_video_bset(int x, int y, int color) {
     if (x < 0 || x >= BRICKLUA_W || y < 0 || y >= BRICKLUA_H) return;
     g_fb[y * BRICKLUA_W + x] = (uint8_t)(color & 1);
 }
 
-int bricklua_video_pget(int x, int y) {
+int bricklua_video_bget(int x, int y) {
     if (x < 0 || x >= BRICKLUA_W || y < 0 || y >= BRICKLUA_H) return 0;
     return g_fb[y * BRICKLUA_W + x];
 }
