@@ -146,8 +146,15 @@ void bricklua_bset(int x, int y, int color) {
 }
 
 int bricklua_bget(int x, int y) {
-    if (x < 0 || x >= BRICKLUA_WIDTH || y < 0 || y >= BRICKLUA_HEIGHT) return 0;
-    return (int)g_fb[y * BRICKLUA_WIDTH + x];
+    // Ограничиваем координаты сетки (0..19)
+    if (x < 0 || x >= 20 || y < 0 || y >= 20) return 0;
+    
+    // Переводим координаты сетки в пиксели и берем центр кирпича (3, 3)
+    int px = x * 8 + 3;
+    int py = y * 8 + 3;
+    
+    // Читаем пиксель прямо из глобального буфера
+    return g_fb[py * BRICKLUA_WIDTH + px];
 }
 
 /* ---------- print ---------- */

@@ -16,7 +16,15 @@ void bricklua_bset(int x, int y, int color) {
 }
 
 int bricklua_bget(int x, int y) {
-    return bricklua_video_bget(x, y);
+    // Ограничиваем координаты сетки (0..19)
+    if (x < 0 || x >= 20 || y < 0 || y >= 20) return 0;
+    
+    // Переводим в пиксели и берем центр кирпича
+    int px = x * 8 + 3;
+    int py = y * 8 + 3;
+    
+    // Проверяем пиксель (используем функцию из video.c для надежности)
+    return bricklua_video_pget(px, py);
 }
 
 
