@@ -21,7 +21,7 @@ static int l_bget(lua_State *L) {
     int x = (int)luaL_checkinteger(L, 1);
     int y = (int)luaL_checkinteger(L, 2);
     // Возвращает true, если там есть кирпич, иначе false
-    lua_pushboolean(L, bricklua_pget(x, y) != 0); 
+    lua_pushboolean(L, bricklua_bget(x, y) != 0); 
     return 1;
 }
 

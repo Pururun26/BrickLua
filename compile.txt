@@ -1,7 +1,7 @@
 # native
 cmake -S . -B build-native
 cmake --build build-native
-./build-native/bricklua.exe examples/snake.dlua
+./build-native/bricklua.exe examples/snake.brick
 
 #linux
 cd /mnt/c/home/pururun/Dev/BrickLua/
