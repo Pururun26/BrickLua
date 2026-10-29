@@ -4,16 +4,14 @@
 #include "lualib.h"
 
 static int l_cls(lua_State *L) {
-    // Всегда очищаем в 0 (фон)
-    bricklua_cls(0);
+    bricklua_cls();
     return 0;
 }
 
 static int l_bset(lua_State *L) {
-    // Принимает только 2 аргумента: x и y
-    bricklua_brick((int)luaL_checkinteger(L, 1),
-                   (int)luaL_checkinteger(L, 2),
-                   1); // Всегда ставит кирпич
+    int x = (int)luaL_checkinteger(L, 1);
+    int y = (int)luaL_checkinteger(L, 2);
+    bricklua_brick(x, y);
     return 0;
 }
 
@@ -82,8 +80,7 @@ static int l_print(lua_State *L) {
     if (y > 154) y = 154;
     
     // Сдвигаем на 160 пикселей вправо (начало панели UI)
-    // Текст всегда рисуется цветом 1
-    bricklua_print(s, 160 + x, y, 1);
+    bricklua_print(s, 160 + x, y);
     return 0;
 }
 

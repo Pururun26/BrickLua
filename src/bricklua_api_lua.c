@@ -4,8 +4,7 @@
 #include "bricklua_save.h"
 
 static int l_cls(lua_State *L) {
-    // Всегда очищаем в 0 (фон)
-    bricklua_cls(0);
+    bricklua_cls();
     return 0;
 }
 
@@ -13,7 +12,7 @@ static int l_bset(lua_State *L) {
     int x = (int)luaL_checkinteger(L, 1);
     int y = (int)luaL_checkinteger(L, 2);
     // Всегда ставит кирпич (1). Никаких флагов.
-    bricklua_brick(x, y, 1); 
+    bricklua_brick(x, y); 
     return 0;
 }
 
@@ -25,7 +24,6 @@ static int l_bget(lua_State *L) {
     return 1;
 }
 
-// Текст ТОЛЬКО в правой панели
 // Текст ТОЛЬКО в правой панели
 static int l_print(lua_State *L) {
     const char *s = luaL_checkstring(L, 1);
@@ -41,8 +39,7 @@ static int l_print(lua_State *L) {
     if (y > 154) y = 154;
     
     // Сдвигаем на 160 пикселей вправо (начало панели UI)
-    // Текст всегда рисуется цветом 1
-    bricklua_print(s, 160 + x, y, 1);
+    bricklua_print(s, 160 + x, y);
     return 0;
 }
 

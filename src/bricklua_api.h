@@ -18,9 +18,9 @@ void bricklua_present(void);
 void bricklua_fps_frame(void);
 int  bricklua_fps_get(void);
 
-void bricklua_cls (int color);
-void bricklua_print(const char *s, int x, int y, int color);
-void bricklua_bset(int x, int y, int color);
+void bricklua_cls (void);
+void bricklua_print(const char *s, int x, int y);
+void bricklua_pixel(int x, int y);
 int  bricklua_bget(int x, int y);
 
 void bricklua_sprdata(int id, const char *art);
@@ -31,7 +31,7 @@ void bricklua_rect(int x, int y, int w, int h, int filled);
 void bricklua_oval(int x, int y, int w, int h, int filled);
 
 /* --- Сетка Brick Game (Кубики 8x8) --- */
-void bricklua_brick(int gx, int gy, int color);
+void bricklua_brick(int gx, int gy);
 void bricklua_cls_grid(int color);
 
 int64_t bricklua_time (void);

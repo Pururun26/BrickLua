@@ -7,12 +7,12 @@
 #include <time.h>
 #include <math.h>
 
-void bricklua_cls(int color) {
-    bricklua_video_clear(color);
+void bricklua_cls(void) {
+    bricklua_video_clear(0);
 }
 
-void bricklua_bset(int x, int y, int color) {
-    bricklua_video_bset(x, y, color);
+void bricklua_pixel(int x, int y) {
+    bricklua_video_bset(x, y, 1);
 }
 
 int bricklua_bget(int x, int y) {
@@ -24,7 +24,7 @@ int bricklua_bget(int x, int y) {
     int py = y * 8 + 3;
     
     // Проверяем пиксель (используем функцию из video.c для надежности)
-    return bricklua_video_pget(px, py);
+    return bricklua_video_bget(px, py);
 }
 
 
@@ -39,27 +39,17 @@ static const char* CUBE_PATTERN[7] = {
     "1111111"
 };
 
-void bricklua_brick(int gx, int gy, int color) {
+void bricklua_brick(int gx, int gy) {
     // Сетка строго 20x20 (левая часть экрана)
     if (gx < 0 || gx >= 20 || gy < 0 || gy >= 20) return;
 
     int px = gx * 8;
     int py = gy * 8;
 
-    if (color == 0) {
-        // Стираем кубик (заливаем фоном)
-        for (int y = 0; y < 7; y++) {
-            for (int x = 0; x < 7; x++) {
-                bricklua_video_bset(px + x, py + y, 0);
-            }
-        }
-    } else {
-        // Рисуем кубик
-        for (int y = 0; y < 7; y++) {
-            for (int x = 0; x < 7; x++) {
-                if (CUBE_PATTERN[y][x] == '1') {
-                    bricklua_video_bset(px + x, py + y, color);
-                }
+    for (int y = 0; y < 7; y++) {
+        for (int x = 0; x < 7; x++) {
+            if (CUBE_PATTERN[y][x] == '1') {
+                bricklua_pixel(px + x, py + y);
             }
         }
     }
@@ -117,7 +107,7 @@ void bricklua_spr(int id, int gx, int gy) {
         for (int x = 0; x < BRICK_SPRITE_SIZE; x++) {
             // Рисуем только если там есть кирпич (1)
             if (g_brick_sprites[id][y][x] == 1) {
-                bricklua_brick(gx + x, gy + y, 1);
+                bricklua_brick(gx + x, gy + y);
             }
         }
     }
@@ -133,7 +123,7 @@ void bricklua_line(int x0, int y0, int x1, int y1) {
     int err = dx + dy;
 
     for (;;) {
-        bricklua_brick(x0, y0, 1);
+        bricklua_brick(x0, y0);
         if (x0 == x1 && y0 == y1) break;
         int e2 = 2 * err;
         if (e2 >= dy) { err += dy; x0 += sx; }
@@ -150,17 +140,17 @@ void bricklua_rect(int x, int y, int w, int h, int filled) {
     if (filled) {
         for (int yy = y; yy <= y_end; yy++) {
             for (int xx = x; xx <= x_end; xx++) {
-                bricklua_brick(xx, yy, 1);
+                bricklua_brick(xx, yy);
             }
         }
     } else {
         for (int xx = x; xx <= x_end; xx++) {
-            bricklua_brick(xx, y, 1);     // Верх
-            bricklua_brick(xx, y_end, 1); // Низ
+            bricklua_brick(xx, y);     // Верх
+            bricklua_brick(xx, y_end); // Низ
         }
         for (int yy = y + 1; yy < y_end; yy++) {
-            bricklua_brick(x, yy, 1);     // Лево
-            bricklua_brick(x_end, yy, 1); // Право
+            bricklua_brick(x, yy);     // Лево
+            bricklua_brick(x_end, yy); // Право
         }
     }
 }
@@ -201,10 +191,10 @@ void bricklua_oval(int x, int y, int w, int h, int filled) {
 
         for (int px = xs; px <= xe; px++) {
             if (filled) {
-                bricklua_brick(px, py, 1);
+                bricklua_brick(px, py);
             } else {
                 if (px < inner_xs || px > inner_xe) {
-                    bricklua_brick(px, py, 1);
+                    bricklua_brick(px, py);
                 }
             }
         }
@@ -213,7 +203,7 @@ void bricklua_oval(int x, int y, int w, int h, int filled) {
 
 
 /* ---------- print ---------- */
-void bricklua_print(const char *s, int x, int y, int color) {
+void bricklua_print(const char *s, int x, int y) {
     if (!s) return;
     int cx = x, cy = y;
     for (const unsigned char *p = (const unsigned char *)s; *p; p++) {
@@ -230,11 +220,11 @@ void bricklua_print(const char *s, int x, int y, int color) {
         for (int row = 0; row < FONT_CELL_H; row++) {
             unsigned char bits = bricklua_font[idx][row];
             for (int col = 0; col < FONT_CELL_W; col++) {
-                if ((bits >> (FONT_CELL_W - 1 - col)) & 1)
-                    bricklua_bset(cx + col, cy + row, color);
+                if ((bits >> (FONT_CELL_W - 1 - col)) & 1) {
+                    bricklua_pixel(cx + col, cy + row);
+                }
             }
         }
-
         cx += w + 1;
     }
 }

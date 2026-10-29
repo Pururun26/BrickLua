@@ -106,7 +106,7 @@ static void frame(void) {
         snprintf(buf, sizeof(buf), "FPS:%d", bricklua_fps_get());
         int len = (int)strlen(buf);
         int w   = len * 4;
-        bricklua_print(buf, BRICKLUA_WIDTH - w + 1, 1, 1);
+        bricklua_print(buf, BRICKLUA_WIDTH - w + 1, 1);
     }
 
     BeginDrawing();
