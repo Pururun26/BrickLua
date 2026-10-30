@@ -1,46 +1,21 @@
--- >>> sprites.lua
-sprdata(1, [[
-########
-#000000#
-#0#00#0#
-#000000#
-#000000#
-#0####0#
-#000000#
-########
-]])
-
-sprdata(2, [[
-33####33
-3######3
-########
-########
-########
-########
-3######3
-33####33
-]])
--- <<< sprites.lua
 -- >>> init.lua
 function init_game()
     math.randomseed(utime())
 
     player = {}
-    player.sp = 1
-    player.x = 44
-    player.y = 60
+    player.x = 9
+    player.y = 15
+    player.w = 1
+    player.h = 1
     player.sx = 0
     player.sy = 0
-    player.w = 8
-    player.h = 8
 
     -- ENEMIES --
     enemies = {}
 
     local my_enemy = {}
-    my_enemy.sp = 2
-    my_enemy.x = math.random(0, 120)
-    my_enemy.y = 8
+    my_enemy.x = math.random(0, 19)
+    my_enemy.y = 1
 
     my_enemy.sx = math.random(-1, 1)
     if my_enemy.sx == 0 then my_enemy.sx = 1 end
@@ -48,29 +23,42 @@ function init_game()
     my_enemy.sy = math.random(-1, 1)
     if my_enemy.sy == 0 then my_enemy.sy = 1 end
 
-    my_enemy.w = 8
-    my_enemy.h = 8
+    my_enemy.w = 2
+    my_enemy.h = 2
 
     table.insert(enemies, my_enemy)
+    score = #enemies
+
+    high_score = dget(0)
 
     -- timer_spawn_enemy
     ts_enemy = 0
     enemy_frame = 0
-
-    high_score = dget(0)
-    score = 0
+    -- timer_move_enemies
+    tm_enemies = 0
 
     mode = "START"
 
+    -- blink
     blinkt = 1
     blink_flame = 0
+
+    -- blink player
+    blink_playert = 1
+    bf_player = 0 -- blink flame player
 end
 -- <<< init.lua
 -- >>> update.lua
-
 function update_start()
-    if btnp(4) then
+    if btn(4) then
+        init_game()
         mode = "GAME"
+    end
+
+    tm_enemies = tm_enemies + 1
+    if tm_enemies >= 15 then
+        tm_enemies = 0
+        anim_screen()
     end
 end
 
@@ -78,39 +66,31 @@ function update_game()
     player.sx = 0
     player.sy = 0
 
-    if btn(0) then
-        player.sx = -1
-    end
-    if btn(1) then
-        player.sx = 1
-    end
-    if btn(2) then
-        player.sy = -1
-    end
-    if btn(3) then
-        player.sy = 1
-    end
+    if btn(0) then player.sx = -1 end
+    if btn(1) then player.sx =  1 end
+    if btn(2) then player.sy = -1 end
+    if btn(3) then player.sy =  1 end
 
     player.x = player.x + player.sx
     player.y = player.y + player.sy
 
-    -- PROVERKA STOLKNOVENIE --
-    if player.x > 88 then player.x = 88 end
+    -- CHECK FOR COLLISION WITH THE SCREEN EDGES --
+    if player.x > 19 then player.x = 19 end
     if player.x < 0  then player.x = 0  end
-    if player.y > 88 then player.y = 88 end
+    if player.y > 19 then player.y = 19 end
     if player.y < 0  then player.y = 0  end
 
-    -- SPAVN VRAGOV --
     enemy_spawn()
-    -- OBNOVLENIE VRAGOV --
-    update_enemies()
+
+    tm_enemies = tm_enemies + 1
+    if tm_enemies >= 15 then
+        tm_enemies = 0
+        update_enemies()
+    end
 end
 
 function update_over()
-    if btnp(4) then
-        init_game()
-        mode = "START"
-    end
+    if btn(4) then init_game() end
 end
 
 
@@ -128,24 +108,24 @@ function update_enemies()
             mode = "OVER"
         end
 
-        if e.x >= 88 then
+        if e.x > 18 then
             e.sx = -e.sx
-            e.x = 86
+            e.x = 18
             beep(440, 1, 90)
         end
-        if e.x <= 0 then
+        if e.x < 1 then
             e.sx = math.abs(e.sx)
-            e.x = 4
+            e.x = 0
             beep(440, 1, 90)
         end
-        if e.y >= 88 then
+        if e.y > 18 then
             e.sy = -e.sy
-            e.y = 86
+            e.y = 18
             beep(440, 1, 90)
         end
-        if e.y <= 0 then
+        if e.y < 1 then
             e.sy = math.abs(e.sy)
-            e.y = 4
+            e.y = 0
             beep(440, 1, 90)
         end
     end
@@ -200,39 +180,136 @@ function update_enemies()
         end
     end
 end
---]]
 -- <<< update.lua
 -- >>> draw.lua
 function draw_start()
-    cls()
-    print("DODGE BALLS", 26, 34)
-    print("SCORE:"..high_score, 1, 1)
-    print("PRESS (Z/J) TO START", 11, 64, blink())
+    -- DRAW ENEMIES --
+    for i, my_enemy in ipairs(enemies) do
+        rect(my_enemy.x, my_enemy.y, my_enemy.w, my_enemy.h, true)
+    end
+
+    print("DODGE BRICKS", 15, 40)
+    print("HIGH SCORE:"..high_score, 2, 2)
+    print("SCORE:"..score-1, 2, 8)
+
+    if blink_test() then
+        print("PRESS (Z/J) TO START", 3, 80)
+    end
 end
 
 function draw_game()
-    cls(2)
-    spr(player.sp, player.x, player.y)
-    draw_enemies()
+    if blink_player() then bset(player.x, player.y) end
 
-    print("SCORE:"..#enemies, 1, 1)
+    -- DRAW ENEMIES --
+    for i, my_enemy in ipairs(enemies) do
+        rect(my_enemy.x, my_enemy.y, my_enemy.w, my_enemy.h, true)
+    end
+
+    print("SCORE:"..#enemies, 2, 2)
 end
 
 function draw_over()
-    cls(2)
-    print("GAME OVER", 30, 34)
-    print("SCORE:"..#enemies, 1, 1)
-    print("PRESS (Z/J) TO START", 11, 64, blink())
-end
-
-
--- Рисуем врагов
-function draw_enemies()
-    for i, my_enemy in ipairs(enemies) do
-        spr(my_enemy.sp, my_enemy.x, my_enemy.y)
-    end
+    print("GAME OVER", 22, 40)
+    print("PRESS (Z/J)", 15, 80)
+    print("TO CONTINUE", 22, 85)
 end
 -- <<< draw.lua
+-- >>> tools.lua
+function enemy_spawn()
+    enemy_frame = enemy_frame + 1
+
+    if enemy_frame >= 30 then
+        enemy_frame = 0
+        ts_enemy = ts_enemy + 1
+        if ts_enemy > 5 then
+            ts_enemy = 0
+            
+            -- SPAWN ENEMY --
+            local my_enemy = {}
+            my_enemy.x = math.random(0, 18)
+            my_enemy.y = 1
+
+            my_enemy.sx = math.random(-1, 1)
+            if my_enemy.sx == 0 then my_enemy.sx = 1 end
+
+            my_enemy.sy = math.random(-1, 1)
+            if my_enemy.sy == 0 then my_enemy.sy = 1 end
+
+            my_enemy.w = 2
+            my_enemy.h = 2
+
+            table.insert(enemies, my_enemy)
+            score = #enemies
+        end
+    end
+
+    -- return ts_enemy
+end
+
+
+function blink_test()
+    local baim = { true, true, true, true, true, false }
+
+    blink_flame = blink_flame + 1
+    if blink_flame > 6 then
+        blink_flame = 0
+        if blinkt >= #baim then
+            blinkt = 1
+        else
+            blinkt = blinkt + 1
+        end
+    end
+
+    return baim[blinkt]
+end
+
+
+function blink_player()
+    local baim = {true, false }
+
+    bf_player = bf_player + 1
+    if bf_player > 2 then
+        bf_player = 0
+        if blink_playert >= #baim then
+            blink_playert = 1
+        else
+            blink_playert = blink_playert + 1
+        end
+    end
+
+    return baim[blink_playert]
+end
+
+
+function anim_screen()
+    -- 1) движение и отбивание от стен
+    for i, e in ipairs(enemies) do
+        e.x = e.x + e.sx
+        e.y = e.y + e.sy
+
+        if e.x > 18 then
+            e.sx = -e.sx
+            e.x = 18
+            beep(440, 1, 90)
+        end
+        if e.x < 1 then
+            e.sx = math.abs(e.sx)
+            e.x = 0
+            beep(440, 1, 90)
+        end
+        if e.y > 18 then
+            e.sy = -e.sy
+            e.y = 18
+            beep(440, 1, 90)
+        end
+        if e.y < 1 then
+            e.sy = math.abs(e.sy)
+            e.y = 0
+            beep(440, 1, 90)
+        end
+    end
+end
+-- <<< tools.lua
 -- >>> collision.lua
 function collision_rect(a, b)
     -- TABLE A AND B --
@@ -254,58 +331,10 @@ function collision_rect(a, b)
     return true
 end
 -- <<< collision.lua
--- >>> tools.lua
-function enemy_spawn()
-    enemy_frame = enemy_frame + 1
-
-    if enemy_frame >= 30 then
-        enemy_frame = 0
-        ts_enemy = ts_enemy + 1
-        if ts_enemy > 5 then
-            ts_enemy = 0
-            
-            -- SPAWN ENEMY --
-            local my_enemy = {}
-            my_enemy.sp = 2
-            my_enemy.x = math.random(0, 88)
-            my_enemy.y = 8
-
-            my_enemy.sx = math.random(-1, 1)
-            if my_enemy.sx == 0 then my_enemy.sx = 1 end
-
-            my_enemy.sy = math.random(-1, 1)
-            if my_enemy.sy == 0 then my_enemy.sy = 1 end
-
-            my_enemy.w = 8
-            my_enemy.h = 8
-
-            table.insert(enemies, my_enemy)
-            score = #enemies
-        end
-    end
-
-    -- return ts_enemy
-end
-
-function blink()
-    local baim = { 1, 1, 1, 1, 1, 0 }
-
-    blink_flame = blink_flame + 1
-    if blink_flame > 6 then
-        blink_flame = 0
-        if blinkt >= #baim then
-            blinkt = 1
-        else
-            blinkt = blinkt + 1
-        end
-    end
-
-    return baim[blinkt]
-end
--- <<< tools.lua
 
 init_game()
-function update()
+function BRICK()
+    cls()
     if mode == "START" then
         update_start()
         draw_start()

@@ -1,0 +1,115 @@
+-- ==========================================
+-- BRICKLUA SOUND TEST (ИСПРАВЛЕННЫЙ)
+-- ==========================================
+
+-- Список звуков
+local sounds = {
+    { name = "JUMP",      freq = 330,  end_freq = 600,  dur = 4,  vol = 100 },
+    { name = "LASER",     freq = 1500, end_freq = 400,  dur = 3,  vol = 80 },
+    { name = "FALL",      freq = 600,  end_freq = 100,  dur = 10, vol = 100 },
+    { name = "COIN",      freq = 880,  end_freq = 880,  dur = 4,  vol = 80 },
+    { name = "HIT",       freq = 150,  end_freq = 150,  dur = 8,  vol = 100 },
+    { name = "EXPLOSION", freq = 0,    end_freq = 0,    dur = 15, vol = 100 },
+}
+
+local selected = 1
+local pulse = 0
+
+-- Переменные для эмуляции "слайда" (Пиу!)
+local slide_active = false
+local slide_start = 0
+local slide_end = 0
+local slide_dur = 0
+local slide_timer = 0
+
+function BRICK()
+    cls()
+
+    -- 1. Управление
+    if btn(2) then
+        selected = selected - 1
+        if selected < 1 then selected = #sounds end
+        beep(440, 2, 30) -- Клик меню
+    end
+    
+    if btn(3) then
+        selected = selected + 1
+        if selected > #sounds then selected = 1 end
+        beep(440, 2, 30) -- Клик меню
+    end
+
+    -- 2. Воспроизведение
+    if btn(4) then
+        local s = sounds[selected]
+        if s.freq == s.end_freq then
+            -- Обычный звук (без слайда)
+            beep(s.freq, s.dur, s.vol)
+            pulse = 5
+        else
+            -- Включаем "слайд" (Пиу!)
+            slide_active = true
+            slide_start = s.freq
+            slide_end = s.end_freq
+            slide_dur = s.dur
+            slide_timer = 0
+            pulse = 5
+        end
+    end
+
+    -- 3. Логика "слайда" (эмуляция Пиу через короткие бипы)
+    if slide_active then
+        slide_timer = slide_timer + 1
+        
+        -- Вычисляем текущую частоту (плавный переход)
+        local t = slide_timer / slide_dur
+        local cur_freq = math.floor(slide_start + (slide_end - slide_start) * t)
+        
+        -- Играем очень короткий звук (1 кадр)
+        beep(cur_freq, 1, 100) 
+        
+        if slide_timer >= slide_dur then
+            slide_active = false
+        end
+    end
+
+    -- 4. Визуализация
+    rect(0, 0, 20, 20)
+
+    -- Курсор
+    if math.floor(time() / 150) % 2 == 0 then
+        bset(2, 2 + (selected - 1) * 3)
+    end
+
+    -- Список звуков
+    for i = 1, #sounds do
+        if i == selected then
+            rect(4, 2 + (i - 1) * 3, 8, 1, true)
+        else
+            rect(4, 2 + (i - 1) * 3, 8, 1)
+        end
+    end
+
+    -- Вспышка
+    if pulse > 0 then
+        rect(8, 16, 4, 2, true)
+        pulse = pulse - 1
+    end
+
+    -- 5. Интерфейс справа
+    print("SOUND TEST", 2, 5)
+    
+    local s = sounds[selected]
+    print("SELECTED:", 2, 20)
+    print(s.name, 2, 26)
+    
+    if s.freq ~= s.end_freq then
+        print("SLIDE:", 2, 40)
+        print(tostring(s.freq) .. ">" .. tostring(s.end_freq), 2, 46)
+    else
+        print("BEEP:", 2, 40)
+        print(tostring(s.freq) .. " HZ", 2, 46)
+    end
+
+    print("UP/DN: SELECT", 2, 65)
+    print("A: PLAY", 2, 75)
+end
