@@ -14,6 +14,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define BRICKLUA_MAX_SCRIPT_SIZE 32768
+
 static retro_environment_t        environ_cb;
 static retro_video_refresh_t      video_cb;
 static retro_audio_sample_t       audio_cb;
@@ -69,7 +71,7 @@ RETRO_API void retro_set_input_state(retro_input_state_t cb)        { input_stat
 RETRO_API void retro_get_system_info(struct retro_system_info *info) {
     memset(info, 0, sizeof(*info));
     info->library_name     = "BrickLua";
-    info->library_version  = "1.2.0";
+    info->library_version  = "1.3.0";
     info->need_fullpath    = false;
     info->valid_extensions = "brick";
     info->block_extract    = false;
@@ -137,6 +139,14 @@ RETRO_API bool retro_load_game(const struct retro_game_info *game) {
         retro_log(RETRO_LOG_ERROR, "BrickLua: empty cartridge");
         return false;
     }
+
+    // === ДОБАВЛЕНА ПРОВЕРКА РАЗМЕРА КАРТРИДЖА ===
+    if (game->size > BRICKLUA_MAX_SCRIPT_SIZE) {
+        retro_log(RETRO_LOG_ERROR, "BrickLua: script too large: %zu / %d", 
+                  game->size, BRICKLUA_MAX_SCRIPT_SIZE);
+        return false;
+    }
+    // =============================================
 
     g_last_audio_sec = 0.0;
     g_last_update_us = 0;

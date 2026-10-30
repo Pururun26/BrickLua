@@ -1,11 +1,16 @@
 #include "bricklua_api.h"
 #include "bricklua_font3x4.h"
+#include "bricklua_conf.h"
 
 #include <stdlib.h>   /* abs */
 #include <math.h>     /* sqrt */
 #include <string.h>   /* memset */
 #include <time.h>
 #include <stdint.h>
+
+#ifndef PI
+#define PI 3.14159265358979323846f
+#endif
 
 unsigned char g_fb[BRICKLUA_WIDTH * BRICKLUA_HEIGHT];
 Color         g_palette[BRICKLUA_COLOR_COUNT];
@@ -240,7 +245,6 @@ void bricklua_cls_grid(int color) {
 
 
 /* ---------- BRICK SPRITES (4x4) ---------- */
-#define MAX_BRICK_SPRITES 64
 #define BRICK_SPRITE_SIZE 4
 
 static uint8_t g_brick_sprites[MAX_BRICK_SPRITES][BRICK_SPRITE_SIZE][BRICK_SPRITE_SIZE];
@@ -413,7 +417,7 @@ void bricklua_poll_buttons(void) {
 
 // Настройки автоповтора (DAS - Delayed Auto Shift)
 #define BTN_REPEAT_DELAY 10 // Пауза перед началом движения (в кадрах)
-#define BTN_REPEAT_RATE  5  // Скорость движения после паузы
+#define BTN_REPEAT_RATE  4  // Скорость движения после паузы
 
 static int btn_timer[6] = {0, 0, 0, 0, 0, 0};
 static int btn_held[6]  = {0, 0, 0, 0, 0, 0};
@@ -455,19 +459,29 @@ int bricklua_btn(int i) {
 static Sound g_beep_sound;
 static int   g_beep_used = 0;
 
-static void beep_gen_square(short *s, int n, float freq, int vol) {
+// Генерация синусоиды
+static void beep_gen_sine(short *s, int n, float freq, int vol) {
+    float phase = 0.0f;
+    float step = (2.0f * PI * freq) / BEEP_SAMPLE_RATE;
+    
     for (int i = 0; i < n; i++) {
-        float t     = (float)i / BEEP_SAMPLE_RATE;
-        float phase = fmodf(t * freq, 1.0f);
-        float v     = (phase < 0.5f) ? 1.0f : -1.0f;   /* 50% duty — квадрат */
-        s[i] = (short)(v * vol * 327.67f);
+        float normalized_phase = phase / (2.0f * PI); // от 0.0 до 1.0
+        float v = 4.0f * fabsf(normalized_phase - 0.5f) - 1.0f; 
+        
+        // громкость синусоида
+        s[i] = (short)(v * vol * 100.0f); 
+        
+        phase += step;
+        if (phase >= 2.0f * PI) {
+            phase -= 2.0f * PI;
+        }
     }
 }
 
 static void beep_gen_noise(short *s, int n, int vol) {
     for (int i = 0; i < n; i++) {
-        float v = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;   /* -1..+1 */
-        s[i] = (short)(v * vol * 327.67f);
+        float v = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;
+        s[i] = (short)(v * vol * 100.0f); // громкость шума
     }
 }
 
@@ -481,28 +495,22 @@ static void beep_stop(void) {
 
 void bricklua_beep(int freq, int dur, int vol) {
     if (!IsAudioDeviceReady()) return;
+    if (dur <= 0 || vol <= 0) { beep_stop(); return; }
 
-    /* тишина: dur=0 или vol=0. freq=0 — это шум, не тишина */
-    if (dur <= 0 || vol <= 0) {
-        beep_stop();
-        return;
-    }
-
-    /* клампим, чтобы не словить переполнение/огромный malloc */
-    if (freq <  0)    freq = 0;
-    if (freq >  8000) freq = 8000;
-    if (dur  >   255) dur  = 255;
-    if (vol  >   100) vol  = 100;
+    if (freq < 0) freq = 0;
+    if (freq > 8000) freq = 8000;
+    if (dur > 255) dur = 255;
+    if (vol > 100) vol = 100;
 
     float duration_sec = (float)dur / (float)BRICKLUA_FPS;
-    int   n = (int)(BEEP_SAMPLE_RATE * duration_sec);
+    int n = (int)(BEEP_SAMPLE_RATE * duration_sec);
     if (n <= 0) return;
 
     short *samples = (short *)malloc(n * sizeof(short));
     if (!samples) return;
 
-    if (freq == 0) beep_gen_noise  (samples, n, vol);              /* шум */
-    else           beep_gen_square (samples, n, (float)freq, vol); /* квадрат */
+    if (freq == 0) beep_gen_noise(samples, n, vol);
+    else           beep_gen_sine(samples, n, (float)freq, vol);
 
     Wave wave = {
         .frameCount = (unsigned int)n,
@@ -515,8 +523,7 @@ void bricklua_beep(int freq, int dur, int vol) {
     free(samples);
     if (snd.frameCount == 0) return;
 
-    beep_stop();      /* вытесняем предыдущий */
-
+    beep_stop();
     g_beep_sound = snd;
     g_beep_used  = 1;
     PlaySound(snd);

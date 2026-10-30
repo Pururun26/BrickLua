@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* 64 слота по 8 байт (int64_t) = 512 байт.
+/* 32 слота по 8 байт (int64_t) = 256 байт.
  * Файл: <application_dir>/save/<cartname>.bin */
 
 void bricklua_save_open(const char *cart_path);   /* создать save/, загрузить данные */

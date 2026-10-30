@@ -24,6 +24,9 @@
 #define BRICKLUA_COLOR_GHOST     0x879372FF // Темно-зеленоватый, чуть темнее фона
 
 /* Максимальный размер картриджа в байтах. Больше — не запускаемся. */
-#define BRICKLUA_MAX_SCRIPT_SIZE 65536
+#define BRICKLUA_MAX_SCRIPT_SIZE 32768
 
-#define BRICKLUA_VERSION "1.2.0"
+// Количество спрайтов
+#define MAX_BRICK_SPRITES 64
+
+#define BRICKLUA_VERSION "1.3.0"

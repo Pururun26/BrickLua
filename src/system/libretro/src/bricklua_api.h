@@ -2,12 +2,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/* Save: 64 слота × int64 = 512 байт. */
-#define BRICKLUA_SAVE_SLOTS  64
+/* Save: 32 слота × int64 = 256 байт. */
+#define BRICKLUA_SAVE_SLOTS  32
 
-/* Спрайты: 8x8, 256 слотов. */
-#define BRICKLUA_NUM_SPRITES  256
-#define BRICKLUA_SPRITE_SIZE  8
+/* Спрайты: 4x4, 64 слотов. */
+#define BRICKLUA_NUM_SPRITES  64
+#define BRICKLUA_SPRITE_SIZE  4
 #define BRICKLUA_TRANSPARENT   255
 
 #define BRICKLUA_FPS 30

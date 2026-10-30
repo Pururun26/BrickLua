@@ -7,6 +7,6 @@ categories = "Fantasy Console"
 systemname = "BrickLua"
 license = "MIT"
 permissions = ""
-display_version = "1.2.0"
+display_version = "1.3.0"
 
 [Features]

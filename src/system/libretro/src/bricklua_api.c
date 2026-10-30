@@ -7,6 +7,10 @@
 #include <time.h>
 #include <math.h>
 
+#ifndef PI
+#define PI 3.14159265358979323846f
+#endif
+
 void bricklua_cls(void) {
     bricklua_video_clear(0);
 }
@@ -240,7 +244,7 @@ void bricklua_btn_update(int mask) {
 
 // Настройки автоповтора (DAS - Delayed Auto Shift)
 #define BTN_REPEAT_DELAY 10 // Пауза перед началом движения (в кадрах)
-#define BTN_REPEAT_RATE  5  // Скорость движения после паузы
+#define BTN_REPEAT_RATE  4  // Скорость движения после паузы
 
 static int btn_timer[6] = {0, 0, 0, 0, 0, 0};
 static int btn_held[6]  = {0, 0, 0, 0, 0, 0};
@@ -282,7 +286,6 @@ int bricklua_btn(int i) {
 }
 
 /* ---------- time (ms since start) ---------- */
-
 static int64_t bricklua_now_ms(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -362,13 +365,23 @@ void bricklua_audio_render(int16_t *out, int frames) {
         if (g_tone.active && g_tone.remaining > 0) {
             float v;
             if (g_tone.freq == 0) {
-                v = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;   /* noise */
+                // Белый шум (как на десктопе)
+                v = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;   
             } else {
-                v = (g_tone.phase < 0.5f) ? 1.0f : -1.0f;              /* square */
+                // ТРЕУГОЛЬНАЯ ВОЛНА (Triangle Wave)
+                // g_tone.phase уже в диапазоне от 0.0 до 1.0
+                v = 4.0f * fabsf(g_tone.phase - 0.5f) - 1.0f; 
+                
+                // Двигаем фазу (0.0 .. 1.0)
                 g_tone.phase += (float)g_tone.freq / (float)BRICKLUA_SAMPLE_RATE;
-                if (g_tone.phase >= 1.0f) g_tone.phase -= 1.0f;
+                if (g_tone.phase >= 1.0f) {
+                    g_tone.phase -= 1.0f;
+                }
             }
-            s = (int16_t)(v * g_tone.vol * 327.67f);
+            
+            // Громкость (100.0f = ~30% от максимума)
+            s = (int16_t)(v * g_tone.vol * 100.0f);
+            
             g_tone.remaining--;
         }
 

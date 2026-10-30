@@ -39,7 +39,7 @@ EM_JS(int, bricklua_ls_save, (void *ptr, int size), {
 });
 #endif
 
-#define SAVE_SLOTS  64
+#define SAVE_SLOTS  32
 
 static int64_t g_save[SAVE_SLOTS];
 static int     g_save_ready = 0;

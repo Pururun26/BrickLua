@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """
-pack.py — DotLua packer.
+pack.py — BrickLua packer.
 
-Собирает .dlua картридж с --[[file.lua]] включениями в один файл.
-Алгоритм идентичен C-препроцессору (dotlua_preproc.c).
+Собирает .brick картридж с --[[file.lua]] включениями в один файл.
 
 Usage:
-    python tools/pack.py path/to/main.dlua [-o out.dlua]
-    python tools/pack.py path/to/main.dlua
-        -> path/to/main.packed.dlua
+    python tools/pack.py path/to/main.brick [-o out.brick]
+    python tools/pack.py path/to/main.brick
+        -> path/to/main.packed.brick
 """
 
 import argparse
@@ -56,9 +55,9 @@ def pack_file(path, depth, out):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="DotLua packer")
-    ap.add_argument("cart", help="path to main .dlua")
-    ap.add_argument("-o", "--output", help="output .dlua (default: <cart>.packed.dlua)")
+    ap = argparse.ArgumentParser(description="BrickLua packer")
+    ap.add_argument("cart", help="path to main .brick")
+    ap.add_argument("-o", "--output", help="output .brick (default: <cart>.packed.brick)")
     args = ap.parse_args()
 
     out = []
@@ -71,7 +70,7 @@ def main():
     out_path = args.output
     if not out_path:
         root, ext = os.path.splitext(args.cart)
-        out_path = root + ".packed" + (ext or ".dlua")
+        out_path = root + ".packed" + (ext or ".brick")
 
     with open(out_path, "w", encoding="utf-8", newline="\n") as f:
         for line in out:
