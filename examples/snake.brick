@@ -10,7 +10,7 @@ local speed = 10 -- Чем меньше, тем быстрее
 local game_over = false
 local can_restart = false
 
-function update()
+function BRICK()
     if game_over then
         cls()
         -- Текст теперь выводится в правой панели (x=0 это её начало)
@@ -110,18 +110,18 @@ function draw_game()
 
     -- Рисуем рамку (стены от 0 до 19)
     for i = 0, 19 do
-        pset(i, 0, 1)
-        pset(i, 19, 1)
-        pset(0, i, 1)
-        pset(19, i, 1)
+        bset(i, 0, 1)
+        bset(i, 19, 1)
+        bset(0, i, 1)
+        bset(19, i, 1)
     end
 
     -- Рисуем еду
-    pset(food_x, food_y, 1)
+    bset(food_x, food_y, 1)
 
     -- Рисуем змейку
     for i, segment in ipairs(snake) do
-        pset(segment[1], segment[2], 1)
+        bset(segment[1], segment[2], 1)
     end
 
     -- Выводим интерфейс справа
