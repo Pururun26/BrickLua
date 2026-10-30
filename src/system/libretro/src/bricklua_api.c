@@ -60,9 +60,6 @@ void bricklua_brick(int gx, int gy) {
 }
 
 /* ---------- BRICK SPRITES (4x4) ---------- */
-#define MAX_BRICK_SPRITES 64
-#define BRICK_SPRITE_SIZE 4
-
 static uint8_t g_brick_sprites[MAX_BRICK_SPRITES][BRICK_SPRITE_SIZE][BRICK_SPRITE_SIZE];
 
 void bricklua_sprdata(int id, const char *art) {
