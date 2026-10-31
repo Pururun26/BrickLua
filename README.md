@@ -100,7 +100,7 @@ F11 — fullscreen. Ctrl+P — FPS overlay.
 
 The screen is divided into two zones: the **Game Grid** (left, 20×20 cells) and the **Text Panel** (right, 80 pixels wide). 
 
-All drawing functions operate on the **grid coordinates (0..19)**. You are not drawing pixels; you are placing 8×8 bricks. **There are no color arguments.** Everything is drawn in the foreground color.
+All drawing functions operate on the **grid coordinates (X: 0..9, Y: 0..19)**. You place 8×8 bricks, not pixels. **No color arguments** — everything is drawn in the foreground color.
 
 ```lua
 cls()                     -- clear the ENTIRE screen
