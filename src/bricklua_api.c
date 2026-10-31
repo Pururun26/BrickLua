@@ -72,12 +72,12 @@ void bricklua_present(void) {
             // Нижняя граница: делаем её черной (сливается с фоном окна)
             g_pixels[i] = BLACK;
         } 
-        else if (x == 159) {
+        else if (x == 79) {
             // Только разделитель между игрой и текстом: делаем её черной (сливается с фоном окна)
             g_pixels[i] = BLACK;
         } 
-        else if (x < 159) {
-            // Левая панель (Игровое поле, x от 0 до 158)
+        else if (x < 79) {
+            // Левая панель (Игровое поле, x от 0 до 78)
             if (g_fb[i] & 1) {
                 // Активный кирпич
                 g_pixels[i] = g_palette[1];
@@ -90,7 +90,7 @@ void bricklua_present(void) {
             }
         } 
         else {
-            // Правая панель (Текст, x от 160 до 239)
+            // Правая панель (Текст, x от 80 до 159)
             // Здесь нет ни рамок, ни сетки. Только текст.
             g_pixels[i] = g_palette[g_fb[i] & (BRICKLUA_COLOR_COUNT - 1)];
         }
@@ -152,8 +152,8 @@ void bricklua_pixel(int x, int y) {
 }
 
 int bricklua_bget(int x, int y) {
-    // Ограничиваем координаты сетки (0..19)
-    if (x < 0 || x >= 20 || y < 0 || y >= 20) return 0;
+    // Координаты сетки 10x20
+    if (x < 0 || x >= 10 || y < 0 || y >= 20) return 0;
     
     // Переводим координаты сетки в пиксели и берем центр кирпича (3, 3)
     int px = x * 8 + 3;
@@ -218,8 +218,8 @@ int64_t bricklua_utime(void) {
 
 
 void bricklua_brick(int gx, int gy) {
-    // Теперь сетка 20x20 (левая часть 160x160)
-    if (gx < 0 || gx >= 20 || gy < 0 || gy >= 20) return;
+    // Сетка 10x20
+    if (gx < 0 || gx >= 10 || gy < 0 || gy >= 20) return;
 
     int px = gx * 8;
     int py = gy * 8;
@@ -229,16 +229,6 @@ void bricklua_brick(int gx, int gy) {
             if (CUBE_PATTERN[y][x] == '1') {
                 bricklua_pixel(px + x, py + y);
             }
-        }
-    }
-}
-
-// Очистка ТОЛЬКО левой части (игрового поля)
-void bricklua_cls_grid(int color) {
-    unsigned char c = (unsigned char)(color & (BRICKLUA_COLOR_COUNT - 1));
-    for (int y = 0; y < 96; y++) {
-        for (int x = 0; x < 96; x++) {
-            g_fb[y * BRICKLUA_WIDTH + x] = c;
         }
     }
 }

@@ -20,8 +20,8 @@ void bricklua_pixel(int x, int y) {
 }
 
 int bricklua_bget(int x, int y) {
-    // Ограничиваем координаты сетки (0..19)
-    if (x < 0 || x >= 20 || y < 0 || y >= 20) return 0;
+    // Сетка 10x20
+    if (x < 0 || x >= 10 || y < 0 || y >= 20) return 0;
     
     // Переводим в пиксели и берем центр кирпича
     int px = x * 8 + 3;
@@ -44,8 +44,8 @@ static const char* CUBE_PATTERN[7] = {
 };
 
 void bricklua_brick(int gx, int gy) {
-    // Сетка строго 20x20 (левая часть экрана)
-    if (gx < 0 || gx >= 20 || gy < 0 || gy >= 20) return;
+    // Сетка 10x20
+    if (gx < 0 || gx >= 10 || gy < 0 || gy >= 20) return;
 
     int px = gx * 8;
     int py = gy * 8;

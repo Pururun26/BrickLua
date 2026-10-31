@@ -62,11 +62,11 @@ const void *bricklua_video_get_framebuffer(void) {
         int y = i / BRICKLUA_W;
 
         // 1. Нижняя граница и центральный разделитель (черный корпус)
-        if (y == 159 || x == 159) {
+        if (y == 159 || x == 79) {
             g_pixels[i] = color_black;
         } 
-        // 2. Левая панель (Игровое поле, x от 0 до 158)
-        else if (x < 159) {
+        // 2. Левая панель (Игровое поле, x от 0 до 78)
+        else if (x < 79) {
             if (g_fb[i] & 1) {
                 g_pixels[i] = color_fg;    // Активный кирпич
             } else if (is_ghost_pixel(x, y)) {
@@ -75,7 +75,7 @@ const void *bricklua_video_get_framebuffer(void) {
                 g_pixels[i] = color_bg;    // Пустота
             }
         } 
-        // 3. Правая панель (Текст, x от 160 до 239)
+        // 3. Правая панель (Текст, x от 80 до 159)
         else {
             g_pixels[i] = (g_fb[i] & 1) ? color_fg : color_bg;
         }

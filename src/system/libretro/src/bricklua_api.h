@@ -6,7 +6,7 @@
 #define BRICKLUA_SAVE_SLOTS  32
 
 /* Спрайты: 4x4, 64 слотов. */
-#define MAX_BRICK_SPRITES 64
+#define MAX_BRICK_SPRITES 32
 #define BRICK_SPRITE_SIZE 4
 #define BRICKLUA_TRANSPARENT   255
 

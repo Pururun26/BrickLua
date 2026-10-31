@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-/* Экран BrickLua: 240x160 (20x20 сетка кубиков + панель текста) */
-#define BRICKLUA_W 240
+/* Экран BrickLua: 160x160 (10x20 сетка кубиков + панель текста) */
+#define BRICKLUA_W 160
 #define BRICKLUA_H 160
 
 /* Прямой доступ к 0/1 framebuffer (BRICKLUA_W × BRICKLUA_H байт, row-major).

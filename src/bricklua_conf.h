@@ -1,7 +1,7 @@
 #pragma once
 
-#define BRICKLUA_WINDOW_WIDTH  480
-#define BRICKLUA_WINDOW_HEIGHT 320
+#define BRICKLUA_WINDOW_WIDTH  640
+#define BRICKLUA_WINDOW_HEIGHT 640
 
 // #define BRICKLUA_WINDOW_WIDTH 576
 // #define BRICKLUA_WINDOW_HEIGHT 384
@@ -9,7 +9,7 @@
 /* --- Виртуальный экран (framebuffer) --- */
 // #define BRICKLUA_WIDTH   144
 // #define BRICKLUA_HEIGHT  96
-#define BRICKLUA_WIDTH 240
+#define BRICKLUA_WIDTH 160
 #define BRICKLUA_HEIGHT 160
 
 #define BRICKLUA_TITLE   "BrickLua"
@@ -27,6 +27,6 @@
 #define BRICKLUA_MAX_SCRIPT_SIZE 32768
 
 // Количество спрайтов
-#define MAX_BRICK_SPRITES 64
+#define MAX_BRICK_SPRITES 32
 
-#define BRICKLUA_VERSION "1.3.0"
+#define BRICKLUA_VERSION "2.0.0"

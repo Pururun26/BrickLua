@@ -32,7 +32,6 @@ void bricklua_oval(int x, int y, int w, int h, int filled);
 
 /* --- Сетка Brick Game (Кубики 8x8) --- */
 void bricklua_brick(int gx, int gy);
-void bricklua_cls_grid(int color);
 
 int64_t bricklua_time (void);
 int64_t bricklua_utime(void);

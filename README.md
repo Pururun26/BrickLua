@@ -1,6 +1,6 @@
 # BrickLua
 
-A tiny fantasy console for Lua in the style of the classic Brick Game. 240×160 resolution (20×20 grid of 8×8 bricks + text panel).
+A tiny fantasy console for Lua in the style of the classic Brick Game. 160×160 resolution (10×20 grid of 8×8 bricks + text panel).
 
 - One `.brick` file — the entire game.
 - **No assets, just code.** No sprites, no maps, no music files — only pure Lua and the 8×8 brick.
@@ -8,7 +8,7 @@ A tiny fantasy console for Lua in the style of the classic Brick Game. 240×160 
 - 2-color palette (bg `#9ead86`, fg `#1a1a1a`)
 - Single-channel sound (square wave)
 - **DAS (Delayed Auto Shift)** input — one `btn` function for everything
-- Up to 64 KB of pure code per cartridge (more than enough for a 20×20 grid)
+- Up to 32 KB of pure code per cartridge (more than enough for a 10×20 grid)
 
 **The API is stable** — function names, signatures, and behavior won't change. Only cosmetic additions (new functions, examples, docs) may appear.
 
@@ -130,7 +130,7 @@ oval(5, 5, 4, 4, true)  -- Filled circle
 Need a complex shape (like a car or a Tetris piece)? Draw it once and stamp it anywhere. Sprites are strictly **4×4 bricks** in size.
 
 ```lua
-sprdata(id, art)       -- load a 4×4 sprite into slot id (0..63)
+sprdata(id, art)       -- load a 4×4 sprite into slot id (0..31)
 spr(id, x, y)          -- draw the sprite at grid coordinates
 ```
 
@@ -177,11 +177,11 @@ utime()   -- Unix timestamp in seconds
 ### Save
 
 ```lua
-dset(slot, value)     -- write int64 to slot (0..63)
-dget(slot)            -- read int64 from slot (0..63)
+dset(slot, value)     -- write int64 to slot (0..31)
+dget(slot)            -- read int64 from slot (0..31)
 ```
 
-- **64 slots × 8 bytes = 512 bytes** per cartridge.
+- **32 slots × 8 bytes = 256 bytes** per cartridge.
 - `dset` writes immediately (crash-safe).
 - Desktop: `save/<cartname>.bin` next to the exe.
 - Web: `localStorage['storage']` (persists across reloads).
@@ -238,11 +238,11 @@ end
 
 ## Limitations
 
-- 240×160 resolution (20×20 grid + 80px text panel)
+- 160×160 resolution (10×20 grid + 80px text panel)
 - No colors (only background and bricks)
-- 65536 characters per cartridge
+- 32768 characters per cartridge
 - No external assets, no image loading, no music files
-- 64 save slots × 8 bytes
+- 32 save slots × 8 bytes
 - No `require` — modules via `--[[file.lua]]`
 - No `io`/`os`/`package`/`debug` — sandboxed
 

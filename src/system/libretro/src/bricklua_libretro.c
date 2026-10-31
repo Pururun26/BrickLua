@@ -71,7 +71,7 @@ RETRO_API void retro_set_input_state(retro_input_state_t cb)        { input_stat
 RETRO_API void retro_get_system_info(struct retro_system_info *info) {
     memset(info, 0, sizeof(*info));
     info->library_name     = "BrickLua";
-    info->library_version  = "1.3.0";
+    info->library_version  = "2.0.0";
     info->need_fullpath    = false;
     info->valid_extensions = "brick";
     info->block_extract    = false;
