@@ -45,7 +45,7 @@ cd build-web && python -m http.server 8000
 
 ## Cartridge
 
-A `.brick` file is a regular Lua script with a `.brick` extension. Limit — **65536 characters** (code combined).
+A `.brick` file is a regular Lua script with a `.brick` extension. Limit — **32768 characters** (code combined).
 
 ```lua
 --! dfc 1
