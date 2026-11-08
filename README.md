@@ -250,4 +250,3 @@ end
 
 MIT — see [LICENSE](LICENSE).
 Bundled: Lua 5.4.9 (MIT), raylib 6.0 (zlib) — full texts in `--license`.
-```
